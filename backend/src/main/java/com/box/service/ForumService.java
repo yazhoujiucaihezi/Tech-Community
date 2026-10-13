@@ -57,4 +57,6 @@ public interface ForumService extends IService<Forum> {
 
     /** 获取当前用户收藏的帖子 */
     List<Topic> getCollectsTopic(Integer uid);
+
+    List<Topic> getHotTopic();
 }

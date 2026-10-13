@@ -12,6 +12,7 @@ import com.box.vo.TopicDetailVO;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import com.box.utils.JwtUtils;
 
@@ -156,6 +157,12 @@ public class ForumController {
     public Result<JsonNode> weather(@RequestParam String longitude,
                                     @RequestParam String latitude) {
         return Result.success(weatherService.getWeather(longitude, latitude));
+    }
+
+    /** 获取热门帖子 */
+    @GetMapping("hot-topic")
+    public Result<List<Topic>> getHotTopic() {
+        return Result.success(forumService.getHotTopic());
     }
 
 }

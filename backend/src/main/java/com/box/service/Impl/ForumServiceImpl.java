@@ -22,11 +22,13 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 论坛板块服务实现
@@ -41,7 +43,7 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
     private final TopicCommentMapper topicCommentMapper;
     private final UserDetailMapper userDetailMapper;
     private final RabbitTemplate rabbitTemplate;
-
+    private final StringRedisTemplate stringRedisTemplate;
     /**
      * 获取帖子类型
      */
@@ -137,9 +139,11 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
                     message.setType("like");
                     message.setUrl("/index/topic-detail/" + topic.getId());
                     rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
+                    refreshHotScore(tid);
                 }
             } else {
                 topicMapper.removeLike(tid, uid);
+                refreshHotScore(tid);
             }
         } else if ("collect".equals(type)) {
             if (state) {
@@ -154,9 +158,11 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
                     message.setType("collect");
                     message.setUrl("/index/topic-detail/" + topic.getId());
                     rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
+                    refreshHotScore(tid);
                 }
             } else {
                 topicMapper.removeCollect(tid, uid);
+                refreshHotScore(tid);
             }
         }
     }
@@ -241,6 +247,7 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
             message.setType("reply");
             message.setUrl("/index/topic-detail/" + replyId);
             rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
+            refreshHotScore(commentDTO.getTid());
         }
         }
     }
@@ -263,6 +270,7 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
             throw new BusinessException("无权删除");
         }
         topicCommentMapper.deleteById(id);
+        refreshHotScore(tid);
     }
 
     /**
@@ -313,6 +321,7 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
         topicMapper.deleteLikeByTid(tid);
         topicMapper.deleteCommentByTid(tid);
         topicMapper.deleteCollectByTid(tid);
+        stringRedisTemplate.opsForZSet().remove("forum:hot:post", tid.toString());
     }
 
     /**
@@ -357,6 +366,19 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
         return selectWithInteract(wrapper);
     }
 
+    @Override
+    public List<Topic> getHotTopic() {
+        Set<String> tids = stringRedisTemplate.opsForZSet().reverseRange("forum:hot:post", 0, 9);
+        List<Integer> list;
+        if (tids == null || tids.isEmpty()) {
+            return new ArrayList<>();   // 直接返回空数组，别去查数据库
+        }
+        list = tids.stream().map(Integer::valueOf).toList();
+
+        return topicMapper.selectBatchIds(list);
+
+    }
+
     @NotNull
     private List<Topic> selectWithInteract(LambdaQueryWrapper<Topic> wrapper) {
         wrapper.orderByDesc(Topic::getTime);
@@ -387,5 +409,19 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
         } catch (Exception e) {
             return content;
         }
+    }
+
+    // 重算帖子热度并写入 Redis ZSet
+    private void refreshHotScore(Integer tid) {
+        Integer likeCount = topicMapper.countLikeByTid(tid);
+        Integer collectCount = topicMapper.countCollectByTid(tid);
+        int commentCount = topicMapper.countComments(tid);
+
+        if (likeCount == null) likeCount = 0;
+        if (collectCount == null) collectCount = 0;
+
+        double score = likeCount + commentCount * 3 + collectCount * 2;
+
+        stringRedisTemplate.opsForZSet().add("forum:hot:post", tid.toString(), score);
     }
 }

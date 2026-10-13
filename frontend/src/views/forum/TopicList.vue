@@ -11,7 +11,8 @@ import {
     Edit,
     EditPen, FolderOpened,
     Link, Lock,
-    Microphone, Picture, Star
+    Microphone, Picture, Star,
+    TrendCharts
 } from "@element-plus/icons-vue";
 import Weather from "@/components/Weather.vue";
 import {computed, onMounted, reactive, ref, watch} from "vue";
@@ -22,44 +23,44 @@ import ColorDot from "@/components/ColorDot.vue";
 import router from "@/router";
 import TopicTag from "@/components/TopicTag.vue";
 import TopicCollectList from "@/components/TopicCollectList.vue";
-import {apiForumTopicList, apiForumTopTopics, apiForumWeather} from "@/net/api/forum";
+import {apiForumTopicList, apiForumTopTopics, apiForumWeather, apiForumHotTopics} from "@/net/api/forum";
 
 const store = useStore();
 
 const editor = ref(false)
-const topics =reactive({
+const topics = reactive({
   list: [],
-  type:0,
+  type: 0,
   page: 0,
   end: false,
   top: []
 })
-const collects=ref(false)
+const collects = ref(false)
 
-watch(()=> topics.type,()=>resetList(),{immediate: true})
+watch(() => topics.type, () => resetList(), {immediate: true})
 
 
-function updateList(){
-  if(topics.end) return
+function updateList() {
+  if (topics.end) return
   apiForumTopicList(topics.page, topics.type, data => {
-    if(data) {
+    if (data) {
       data.forEach(d => topics.list.push(d))
       topics.page++
     }
-    if(!data || data.length < 10)
+    if (!data || data.length < 10)
       topics.end = true
   })
 }
 
-function onTopicCreate(){
-  editor.value=false
+function onTopicCreate() {
+  editor.value = false
   resetList()
 }
 
-function resetList(){
-  topics.page=0
-  topics.end=false
-  topics.list=[]
+function resetList() {
+  topics.page = 0
+  topics.end = false
+  topics.list = []
   updateList()
 }
 
@@ -75,6 +76,10 @@ const today = computed(() => {
   const date = new Date()
   return `${date.getFullYear()} 年 ${date.getMonth() + 1} 月 ${date.getDate()} 日`
 })
+
+const hotTopics = ref([])
+
+const loadHotTopics = () => apiForumHotTopics(data => hotTopics.value = data)
 
 navigator.geolocation.getCurrentPosition(position => {
   const longitude = position.coords.longitude
@@ -96,9 +101,9 @@ navigator.geolocation.getCurrentPosition(position => {
 })
 
 
-
 onMounted(() => {
   apiForumTopTopics(data => topics.top = data)
+  loadHotTopics()
 })
 </script>
 
@@ -197,9 +202,24 @@ onMounted(() => {
           </div>
           <el-divider style="margin: 10px 0"/>
           <div style="font-size: 14px;margin: 10px;color: grey">
-            论坛内容
+            本论坛禁止语言攻击、辱骂他人
           </div>
         </Light-card>
+
+        <Light-card style="margin-top: 10px">
+          <div style="font-weight: bold">
+            <el-icon><TrendCharts/></el-icon>
+            热门帖子
+          </div>
+          <el-divider style="margin: 10px 0"/>
+          <div v-for="(item, index) in hotTopics" :key="item.id"
+               class="hot-topic-item" @click="router.push('/index/topic-detail/' + item.id)">
+            <span class="rank" :class="'rank-' + (index + 1)">{{ index + 1 }}</span>
+            <span class="title">{{ item.title }}</span>
+          </div>
+          <el-empty v-if="!hotTopics.length" description="暂无热门帖子" :image-size="60"/>
+        </Light-card>
+
         <Light-card style="margin-top: 10px">
           <div style="font-weight: bold">
             <el-icon><Calendar/></el-icon>
@@ -325,6 +345,45 @@ onMounted(() => {
     height: 100%;
     max-height: 110px;
     border-radius: 5px;
+  }
+}
+
+.hot-topic-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  cursor: pointer;
+  transition: color .3s;
+
+  &:hover {
+    color: #409eff;
+  }
+
+  .rank {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    background: #dcdcdc;
+    color: #666;
+    margin-right: 8px;
+    flex-shrink: 0;
+
+    &.rank-1 { background: #ff4757; color: #fff; }
+    &.rank-2 { background: #ff7f50; color: #fff; }
+    &.rank-3 { background: #ffa502; color: #fff; }
+  }
+
+  .title {
+    flex: 1;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

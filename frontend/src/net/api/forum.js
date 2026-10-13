@@ -89,3 +89,6 @@ export const apiTopicTypeCreate = (data, success) =>
 export const apiTopicChangeType = (tid, type, success) =>
     get(`/api/admin/forum/change-topic-type?tid=${tid}&type=${type}`, success)
 
+// 热门帖子
+export const apiForumHotTopics = (success) =>
+    get('/api/forum/hot-topic', success)

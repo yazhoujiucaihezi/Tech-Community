@@ -36,9 +36,6 @@ public class User {
     /** 创建时间 */
     private LocalDateTime createTime;
 
-    /** 更新时间 */
-    private LocalDateTime updateTime;
-
     /** 是否禁言：0 否，1 是 */
     private Integer mute;
 
