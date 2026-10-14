@@ -34,15 +34,20 @@ public class HotScoreInitializer implements CommandLineRunner {
     }
 
     private void refreshAll(){
-        // 清空整个 ZSet，重算
-        stringRedisTemplate.delete("forum:hot:post");
 
+        String tmpkey = "forum:hot:post:tmp";
+
+        //1, 清空临时Key
+        stringRedisTemplate.delete(tmpkey);
+
+        //2, 获取7天内的所有帖子
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         List<Topic> allTopics = topicMapper.selectList(
                 new LambdaQueryWrapper<Topic>()
                         .ge(Topic::getTime, sevenDaysAgo)
         );
 
+        //3, 遍历帖子，计算分数并写入临时Key
         for (Topic topic : allTopics) {
             Integer likeCount = topicMapper.countLikeByTid(topic.getId());
             Integer collectCount = topicMapper.countCollectByTid(topic.getId());
@@ -56,8 +61,9 @@ public class HotScoreInitializer implements CommandLineRunner {
             long hours = Duration.between(topic.getTime(), LocalDateTime.now()).toHours();
 
             double score = base / Math.pow(hours + 2,1.5);
-            stringRedisTemplate.opsForZSet().add(
-                    "forum:hot:post", topic.getId().toString(), score);
+            stringRedisTemplate.opsForZSet().add(tmpkey, topic.getId().toString(), score);
         }
+        // 4. 原子切换（rename 会覆盖旧 key）
+        stringRedisTemplate.rename(tmpkey, "forum:hot:post");
     }
 }

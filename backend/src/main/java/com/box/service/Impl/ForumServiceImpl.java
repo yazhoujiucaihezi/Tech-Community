@@ -25,7 +25,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,11 +139,11 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
                     message.setType("like");
                     message.setUrl("/index/topic-detail/" + topic.getId());
                     rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
-                    refreshHotScore(tid);
+                    incrementScore(tid, 1);
                 }
             } else {
                 topicMapper.removeLike(tid, uid);
-                refreshHotScore(tid);
+                incrementScore(tid, -1);
             }
         } else if ("collect".equals(type)) {
             if (state) {
@@ -159,11 +158,11 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
                     message.setType("collect");
                     message.setUrl("/index/topic-detail/" + topic.getId());
                     rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
-                    refreshHotScore(tid);
+                    incrementScore(tid, 2);
                 }
             } else {
                 topicMapper.removeCollect(tid, uid);
-                refreshHotScore(tid);
+                incrementScore(tid, -2);
             }
         }
     }
@@ -248,7 +247,7 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
             message.setType("reply");
             message.setUrl("/index/topic-detail/" + replyId);
             rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
-            refreshHotScore(commentDTO.getTid());
+            incrementScore(commentDTO.getTid(), 3);
         }
         }
     }
@@ -271,7 +270,7 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
             throw new BusinessException("无权删除");
         }
         topicCommentMapper.deleteById(id);
-        refreshHotScore(tid);
+        incrementScore(tid, -3);
     }
 
     /**
@@ -412,22 +411,8 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
         }
     }
 
-    // 重算帖子热度并写入 Redis ZSet
-    private void refreshHotScore(Integer tid) {
-        Integer likeCount = topicMapper.countLikeByTid(tid);
-        Integer collectCount = topicMapper.countCollectByTid(tid);
-        int commentCount = topicMapper.countComments(tid);
-
-        if (likeCount == null) likeCount = 0;
-        if (collectCount == null) collectCount = 0;
-
-        double base = likeCount + commentCount * 3 + collectCount * 2;
-
-        Topic topic = topicMapper.selectById(tid);
-        long hours = Duration.between(topic.getTime(), LocalDateTime.now()).toHours();
-
-        double score = base / Math.pow(hours + 2,1.5);
-
-        stringRedisTemplate.opsForZSet().add("forum:hot:post", tid.toString(), score);
+    //分数增减
+    private void incrementScore(Integer tid, double delta) {
+        stringRedisTemplate.opsForZSet().incrementScore("forum:hot:post", tid.toString(), delta);
     }
 }
