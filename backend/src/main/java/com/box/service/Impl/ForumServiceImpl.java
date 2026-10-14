@@ -25,6 +25,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -420,7 +421,12 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
         if (likeCount == null) likeCount = 0;
         if (collectCount == null) collectCount = 0;
 
-        double score = likeCount + commentCount * 3 + collectCount * 2;
+        double base = likeCount + commentCount * 3 + collectCount * 2;
+
+        Topic topic = topicMapper.selectById(tid);
+        long hours = Duration.between(topic.getTime(), LocalDateTime.now()).toHours();
+
+        double score = base / Math.pow(hours + 2,1.5);
 
         stringRedisTemplate.opsForZSet().add("forum:hot:post", tid.toString(), score);
     }
