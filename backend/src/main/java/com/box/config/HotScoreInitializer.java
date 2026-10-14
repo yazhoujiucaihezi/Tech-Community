@@ -1,5 +1,6 @@
 package com.box.config;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.box.entity.Topic;
 import com.box.mapper.TopicMapper;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +28,20 @@ public class HotScoreInitializer implements CommandLineRunner {
         refreshAll();
     }
 
-    @Scheduled(cron = "0 0 * * * ?")   // 每小时整点
+    @Scheduled(cron = "0 */10 * * * ?")  // 每10分钟
     public void scheduledRefresh() {
         refreshAll();
     }
 
     private void refreshAll(){
-        List<Topic> allTopics = topicMapper.selectList(null);
+        // 清空整个 ZSet，重算
+        stringRedisTemplate.delete("forum:hot:post");
+
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        List<Topic> allTopics = topicMapper.selectList(
+                new LambdaQueryWrapper<Topic>()
+                        .ge(Topic::getTime, sevenDaysAgo)
+        );
 
         for (Topic topic : allTopics) {
             Integer likeCount = topicMapper.countLikeByTid(topic.getId());
