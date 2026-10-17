@@ -14,18 +14,25 @@
 
 ---
 
-<img width="2880" height="1530" alt="5384b87843aca68d37786dfc342b6b26" src="https://github.com/user-attachments/assets/b0f65128-a015-46ed-996d-7b7a02a2715c" />
+## 📸 系统界面预览
 
-<img width="2880" height="1530" alt="018bcd577c29dd31541f898a30acf1d9" src="https://github.com/user-attachments/assets/4dec428f-af0f-4f75-8487-a5a3979fb2b9" />
+![首页预览](https://github.com/user-attachments/assets/b0f65128-a015-46ed-996d-7b7a02a2715c)
 
-<img width="2880" height="1530" alt="e50a6353c2dfd538796c9c536ab91eaf" src="https://github.com/user-attachments/assets/b7380668-2137-4ef3-961e-90e25acc5d21" />
+<details>
+<summary><b>👉 点击展开更多系统高清运行截图（AI 助手 / 详情通知 / 管理后台 / redis数据）</b></summary>
+<br>
 
-<img width="2880" height="1530" alt="9af96796a1e75121d97e0dfb782de257" src="https://github.com/user-attachments/assets/be70424b-9b3c-4ea9-85f6-d206e30cc28d" />
+![预览图2](https://github.com/user-attachments/assets/4dec428f-af0f-4f75-8487-a5a3979fb2b9)
 
-<img width="1934" height="1130" alt="d95c020d237b8d9e1bb6283c8a3cdf34" src="https://github.com/user-attachments/assets/281a8fb0-619a-468d-995e-d79c2b3b6dd0" />
+![预览图3](https://github.com/user-attachments/assets/b7380668-2137-4ef3-961e-90e25acc5d21)
+
+![预览图4](https://github.com/user-attachments/assets/be70424b-9b3c-4ea9-85f6-d206e30cc28d)
+
+![预览图5](https://github.com/user-attachments/assets/281a8fb0-619a-468d-995e-d79c2b3b6dd0)
+
+</details>
 
 
-## ✨ 功能特性
 
 | 模块 | 核心功能模块 | 功能描述 |
 | :--- | :--- | :--- |
