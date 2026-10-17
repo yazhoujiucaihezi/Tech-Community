@@ -64,6 +64,11 @@ public class HotScoreInitializer implements CommandLineRunner {
             stringRedisTemplate.opsForZSet().add(tmpkey, topic.getId().toString(), score);
         }
         // 4. 原子切换（rename 会覆盖旧 key）
-        stringRedisTemplate.rename(tmpkey, "forum:hot:post");
+        if (stringRedisTemplate.hasKey(tmpkey)) {
+            stringRedisTemplate.rename(tmpkey, "forum:hot:post");
+        } else {
+            // 如果没数据，就把旧的榜单清空，防止展示过期数据
+            stringRedisTemplate.delete("forum:hot:post");
+        }
     }
 }
