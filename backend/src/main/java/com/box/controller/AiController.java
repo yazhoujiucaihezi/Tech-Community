@@ -3,6 +3,9 @@ package com.box.controller;
 import com.box.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +27,8 @@ public class AiController {
     @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> chat(@RequestBody List<Map<String, Object>> messages, @RequestHeader("Authorization") String auth) {
         Integer uid = JwtUtils.getUid(auth);
-        String userMessage = String.valueOf(messages.get(messages.size() - 1).get("text"));
 
+        // 聊天频率限制
         String limitKey = "chat_limit:" + uid;
         Long increment = redisTemplate.opsForValue().increment(limitKey);
 
@@ -45,9 +48,21 @@ public class AiController {
             messages.add(0, summary);
             }
 
+        List<Message> usermessages = new ArrayList<>();
+        for (Map<String, Object> msg : messages) {
+            String text = String.valueOf(msg.get("text"));
+            String role = msg.get("role") != null ? msg.get("role").toString() : "user";
+
+            if ("assistant".equals(role)) {
+                usermessages.add(new AssistantMessage(text));
+            } else {
+                usermessages.add(new UserMessage(text));
+            }
+        }
+
         return chatClient.prompt()
-                .system("你是一个校园论坛的AI助手,如若用户没有要求,请用中文回答")
-                .user(userMessage)
+                .system("你是一个校园论坛的AI助手,如若用户没有要求,请用中文回答。请结合上下文回答用户问题。")
+                .messages(usermessages)
                 .stream()
                 .content();
     }

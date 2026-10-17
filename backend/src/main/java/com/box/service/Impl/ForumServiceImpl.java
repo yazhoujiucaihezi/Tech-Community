@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -369,13 +370,16 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
     @Override
     public List<Topic> getHotTopic() {
         Set<String> tids = stringRedisTemplate.opsForZSet().reverseRange("forum:hot:post", 0, 9);
-        List<Integer> list;
         if (tids == null || tids.isEmpty()) {
             return new ArrayList<>();   // 直接返回空数组，别去查数据库
         }
-        list = tids.stream().map(Integer::valueOf).toList();
 
-        return topicMapper.selectBatchIds(list);
+        List<Integer> tidsList = tids.stream().map(Integer::valueOf).toList();
+
+        List<Topic> topics = topicMapper.selectBatchIds(tidsList);
+
+        topics.sort(Comparator.comparingInt(t -> tidsList.indexOf(t.getId())));
+        return topics;
 
     }
 

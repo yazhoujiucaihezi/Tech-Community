@@ -33,8 +33,15 @@ const sendMessage = () => {
             timestamp: new Date()
         })
 
-        const context = [ ...messages.value ]
-        context.length -= 1
+        // 👇 【核心修改区域】 👇
+        // 1. 去掉最后一条占位的空 AI 消息
+        // 2. 把 type 转换为后端需要的 role，并只传 role 和 text
+        const context = messages.value
+            .slice(0, messages.value.length - 1)
+            .map(msg => ({
+                role: msg.type, // 'user' 或 'assistant'
+                text: msg.text
+            }))
 
         apiChatWithAI(context, text => {
             messages.value[messages.value.length - 1].text += text
@@ -44,10 +51,7 @@ const sendMessage = () => {
         }, () => {
             chatLoading.value = false
         })
-
     }
-
-
 }
 </script>
 
