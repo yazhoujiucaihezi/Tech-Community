@@ -10,3 +10,11 @@ frontend/.vs/
 campus-forum-springboot-vue-github-clean/
 frontend.zip
 backend/uploads/
+
+# 本地私有配置与密钥（模板见 *.example）
+application-local.yml
+application-dev.yml
+application-prod.yml
+*.pem
+*.key
+.env

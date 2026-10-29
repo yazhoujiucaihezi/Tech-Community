@@ -1,0 +1,37 @@
+# 本地私有配置模板
+#
+# 用法：复制本文件为 application-local.yml，填入真实值。
+# application-local.yml 已被 .gitignore 忽略，不会提交到仓库。
+#
+# 也可以不建这个文件，改用环境变量：
+#   DB_PASSWORD / RABBITMQ_HOST / RABBITMQ_USERNAME / RABBITMQ_PASSWORD
+#   ZHIPU_API_KEY / MAIL_USERNAME / MAIL_PASSWORD / JWT_SECRET
+#   QWEATHER_HOST / QWEATHER_KID / QWEATHER_SUB / QWEATHER_ISS / QWEATHER_KEY_PATH
+#   UPLOAD_DIR
+spring:
+  datasource:
+    password: 你的数据库密码
+
+  rabbitmq:
+    host: 127.0.0.1
+    username: guest
+    password: guest
+
+  ai:
+    openai:
+      api-key: 你的智谱 API Key
+
+  mail:
+    username: 你的QQ邮箱@qq.com
+    password: 你的邮箱SMTP授权码
+
+qweather:
+  host: https://xxxxxxxxxx.re.qweatherapi.com
+  kid: 你的KID
+  sub: 你的SUB
+  iss: 你的ISS
+  private-key-path: D:/forum/backend/ed25519-private.pem
+
+# 至少 32 字节，可用 openssl rand -base64 32 生成
+jwt:
+  secret: 换成一串不少于32字节的随机字符串

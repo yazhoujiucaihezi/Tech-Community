@@ -267,19 +267,34 @@ SOURCE forum.sql;
 
 ### 三、配置
 
-编辑 `backend/src/main/resources/application.yml`：
+所有敏感配置都从 `application.yml` 里抽出来了，仓库中只保留占位符，**默认值不含任何密钥**。
+
+```bash
+cd backend/src/main/resources
+cp application-dev.yml.example application-dev.yml
+```
+
+然后在 `application-dev.yml` 里填写真实值（这个文件已被 `.gitignore` 忽略，不会提交）：
 
 | 配置项 | 说明 |
 | :--- | :--- |
-| `spring.datasource.*` | MySQL 地址、账号、密码 |
-| `spring.data.redis.*` | Redis 地址（默认 localhost:6379） |
-| `spring.rabbitmq.*` | RabbitMQ 地址与账号 |
+| `spring.datasource.password` | MySQL 密码 |
+| `spring.rabbitmq.host / username / password` | RabbitMQ 地址与账号 |
 | `spring.mail.username / password` | QQ 邮箱与 SMTP 授权码 |
+| `spring.ai.openai.api-key` | 大模型 API Key（不用 AI 可留空） |
+| `qweather.*` | 和风天气 host / kid / sub / iss / 私钥路径（不用天气可留空） |
 | `jwt.secret` | JWT 签名密钥，**至少 32 字节** |
-| `qweather.*` | 和风天气 host / kid / sub / 私钥路径（不用天气可忽略） |
-| `spring.ai.openai.api-key` | 大模型 API Key（不用 AI 可忽略） |
 
-> 密钥不要提交到仓库，建议用环境变量覆盖，例如 `JWT_SECRET`、`SPRING_DATASOURCE_PASSWORD`。
+也可以不建这个文件，直接用环境变量覆盖：
+
+```bash
+DB_PASSWORD=xxx RABBITMQ_PASSWORD=xxx ZHIPU_API_KEY=xxx JWT_SECRET=xxx mvn spring-boot:run
+```
+
+可选环境变量全表：`DB_USERNAME` `DB_PASSWORD` `RABBITMQ_HOST` `RABBITMQ_PORT` `RABBITMQ_USERNAME` `RABBITMQ_PASSWORD` `ZHIPU_API_KEY` `MAIL_USERNAME` `MAIL_PASSWORD` `JWT_SECRET` `UPLOAD_DIR` `QWEATHER_*`
+
+> ⚠️ `*.pem` 私钥、`application-dev.yml`、`.env` 都已在 `.gitignore` 中，**不要用 `git add -f` 强行提交**。
+
 
 ### 四、启动
 

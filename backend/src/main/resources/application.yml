@@ -1,19 +1,22 @@
 spring:
+  profiles:
+    active: dev            # 本地私有配置见 application-dev.yml（已被 .gitignore 忽略）
+
   datasource:
     url: jdbc:mysql://localhost:3306/forum?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: root
-    password: root
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   rabbitmq:
-    host: 192.168.181.128   # 你的虚拟机 IP
-    port: 5672
-    username: box
-    password: 123
+    host: ${RABBITMQ_HOST:localhost}      # 换成你 RabbitMQ 的地址
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 
   ai:
     openai:
-      api-key: 6a4c3b5f29104c3287f5991eb6b00771.BemmbqcMVWuMtmmd   # 记得填真实的
+      api-key: ${ZHIPU_API_KEY:}          # 在 application-local.yml 或环境变量中提供
       base-url: https://open.bigmodel.cn/api/paas/v4
       chat:
         completions-path: /chat/completions
@@ -23,8 +26,8 @@ spring:
   mail:
     host: smtp.qq.com
     port: 587
-    username: 你的QQ邮箱
-    password: 你的邮箱授权码
+    username: ${MAIL_USERNAME:}           # 你的 QQ 邮箱
+    password: ${MAIL_PASSWORD:}           # 邮箱 SMTP 授权码
     properties:
       mail:
         smtp:
@@ -39,14 +42,14 @@ spring:
 
 app:
   upload:
-    dir: D:/forum/backend/uploads/   # 换成你本地的实际路径，结尾带斜杠
+    dir: ${UPLOAD_DIR:D:/forum/backend/uploads/}   # 本地实际路径，结尾带斜杠
 
 qweather:
-  host: https://nk6mthkn5k.re.qweatherapi.com
-  kid: KEB55MARN2
-  sub: 2AE3U8NW7V
-  iss: Q1722007A5
-  private-key-path: D:/forum/backend/ed25519-private.pem
+  host: ${QWEATHER_HOST:}
+  kid: ${QWEATHER_KID:}
+  sub: ${QWEATHER_SUB:}
+  iss: ${QWEATHER_ISS:}
+  private-key-path: ${QWEATHER_KEY_PATH:}          # Ed25519 私钥文件路径，切勿提交
 
 mybatis-plus:
   global-config:
@@ -56,5 +59,6 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # JWT 签名密钥，至少 32 字节（HS256 要求 256 位）
+# 生产环境务必用环境变量 JWT_SECRET 覆盖，不要沿用仓库里的默认值
 jwt:
-  secret: box-forum-secret-key-1234567890abcdef
+  secret: ${JWT_SECRET:local-dev-only-jwt-secret-key-change-me-32b}
