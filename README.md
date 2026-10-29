@@ -63,6 +63,10 @@
 
 <img width="880" alt="首页" src="https://github.com/user-attachments/assets/b0f65128-a015-46ed-996d-7b7a02a2715c" />
 
+<details>
+<summary><b>点击展开更多截图（帖子详情 / 编辑器 / 个人中心 / 管理后台）</b></summary>
+<br>
+
 <img width="880" alt="帖子详情" src="https://github.com/user-attachments/assets/4dec428f-af0f-4f75-8487-a5a3979fb2b9" />
 
 <img width="880" alt="发帖编辑器" src="https://github.com/user-attachments/assets/b7380668-2137-4ef3-961e-90e25acc5d21" />
@@ -70,6 +74,8 @@
 <img width="880" alt="个人中心" src="https://github.com/user-attachments/assets/be70424b-9b3c-4ea9-85f6-d206e30cc28d" />
 
 <img width="880" alt="后台管理" src="https://github.com/user-attachments/assets/281a8fb0-619a-468d-995e-d79c2b3b6dd0" />
+
+</details>
 
 </div>
 
