@@ -10,7 +10,7 @@ import {
     Document,
     Edit,
     EditPen, FolderOpened,
-    Link, Lock,
+    Lock,
     Microphone, Picture, Star,
     TrendCharts
 } from "@element-plus/icons-vue";
@@ -238,19 +238,6 @@ onMounted(() => {
             <div>127.0.0.1</div>
           </div>
         </light-card>
-        <div style="font-size: 14px;margin-top: 10px;color: grey">
-          <el-icon><Link/></el-icon>
-          友情链接
-          <el-divider style="margin: 10px 0"/>
-        </div>
-        <div style="display: grid;grid-template-columns: repeat(2, 1fr);grid-gap: 10px;margin-top: 10px">
-          <div class="friend-link">
-            <el-image style="height: 100%" src="https://element-plus.org/images/js-design-banner.jpg"/>
-          </div>
-          <div class="friend-link">
-            <el-image style="height: 100%" src="https://element-plus.org/images/vform-banner.png"/>
-          </div>
-        </div>
       </div>
     </div>
     <topic-editor :show="editor" @success="onTopicCreate" @close="editor=false"/>
@@ -392,11 +379,6 @@ onMounted(() => {
   justify-content: space-between;
   color: grey;
   font-size: 14px;
-}
-
-.friend-link {
-  border-radius: 5px;
-  overflow: hidden;
 }
 
 .create-topic {

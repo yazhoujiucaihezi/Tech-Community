@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     public static final String NOTIFICATION_QUEUE = "notification.queue";
+
     @Bean
     public Queue notificationQueue() {
         return new Queue(NOTIFICATION_QUEUE);

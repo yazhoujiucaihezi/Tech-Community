@@ -16,6 +16,9 @@ public class Notification {
     @TableId(type = IdType.AUTO)
     private Integer id;
 
+    /** 消息唯一标识，与 db_notification.msg_id 唯一索引配合做幂等兜底 */
+    private String msgId;
+
     /** 接收者用户 ID */
     private Integer uid;
 

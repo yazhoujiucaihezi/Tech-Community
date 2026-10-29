@@ -10,6 +10,7 @@ import com.box.service.WeatherService;
 import com.box.vo.CommentVO;
 import com.box.vo.TopicDetailVO;
 import com.fasterxml.jackson.databind.JsonNode;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -29,6 +30,7 @@ public class ForumController {
 
     private final ForumService forumService;
     private final WeatherService weatherService;
+    private final JwtUtils jwtUtils;
 
     /**
      * 获取帖子类型
@@ -61,7 +63,7 @@ public class ForumController {
      */
     @GetMapping("/topic")
     public Result<TopicDetailVO> getTopic(@RequestHeader("Authorization") String authHeader, @RequestParam Integer tid) {
-        return Result.success(forumService.getTopic(JwtUtils.getUid(authHeader), tid));
+        return Result.success(forumService.getTopic(jwtUtils.getUid(authHeader), tid));
     }
 
     /**
@@ -72,7 +74,7 @@ public class ForumController {
                                  @RequestParam Integer tid,
                                  @RequestParam String type,
                                  @RequestParam Boolean state) {
-        forumService.interact(JwtUtils.getUid(authHeader), tid, type, state);
+        forumService.interact(jwtUtils.getUid(authHeader), tid, type, state);
         return Result.success(null);
     }
 
@@ -90,7 +92,7 @@ public class ForumController {
     @PostMapping("/add-comment")
     public Result<Void> addComment(@RequestHeader("Authorization") String authHeader,
                                    @RequestBody CommentDTO commentDTO) {
-        forumService.addComment(JwtUtils.getUid(authHeader), commentDTO);
+        forumService.addComment(jwtUtils    .getUid(authHeader), commentDTO);
         return Result.success(null);
     }
 
@@ -100,7 +102,7 @@ public class ForumController {
     @GetMapping("/delete-comment")
     public Result<Void> deleteComment(@RequestHeader("Authorization") String authHeader,
                                       @RequestParam Integer id) {
-        forumService.deleteComment(JwtUtils.getUid(authHeader), JwtUtils.getRole(authHeader), id);
+        forumService.deleteComment(jwtUtils.getUid(authHeader), jwtUtils.getRole(authHeader), id);
         return Result.success(null);
     }
 
@@ -110,7 +112,7 @@ public class ForumController {
     @PostMapping("/update-topic")
     public Result<Void> updateTopic(@RequestHeader("Authorization") String authHeader,
                                     @RequestBody TopicUpdateDTO dto) {
-        forumService.updateTopic(JwtUtils.getRole(authHeader), JwtUtils.getUid(authHeader), dto);
+        forumService.updateTopic(jwtUtils.getRole(authHeader), jwtUtils.getUid(authHeader), dto);
         return Result.success(null);
     }
 
@@ -120,7 +122,7 @@ public class ForumController {
     @PostMapping("/create-topic")
     public Result<Void> createTopic(@RequestHeader("Authorization") String authHeader,
                                     @RequestBody TopicUpdateDTO dto) {
-        forumService.createTopic(JwtUtils.getUid(authHeader), dto);
+        forumService.createTopic(jwtUtils.getUid(authHeader), dto);
         return Result.success(null);
     }
 
@@ -130,14 +132,14 @@ public class ForumController {
     @GetMapping("/delete-topic")
     public Result<Void> deleteTopic(@RequestHeader("Authorization") String authHeader,
                                     @RequestParam Integer tid) {
-        forumService.deleteTopic(JwtUtils.getUid(authHeader), JwtUtils.getRole(authHeader), tid);
+        forumService.deleteTopic(jwtUtils.getUid(authHeader), jwtUtils.getRole(authHeader), tid);
         return Result.success(null);
     }
 
     /** 获取当前用户的帖子列表 */
     @GetMapping("/user-topic")
     public Result<List<Topic>> getUserTopic(@RequestHeader("Authorization") String authHeader) {
-        return Result.success(forumService.getUserTopic(JwtUtils.getUid(authHeader)));
+        return Result.success(forumService.getUserTopic(jwtUtils.getUid(authHeader)));
     }
 
     /** 搜索帖子 */
@@ -149,7 +151,7 @@ public class ForumController {
     /** 获取当前用户收藏的帖子 */
     @GetMapping("/collects")
     public Result<List<Topic>> getCollectsTopic(@RequestHeader("Authorization") String authHeader) {
-        return Result.success(forumService.getCollectsTopic(JwtUtils.getUid(authHeader)));
+        return Result.success(forumService.getCollectsTopic(jwtUtils.getUid(authHeader)));
     }
 
     /** 获取天气信息 */

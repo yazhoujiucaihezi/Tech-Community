@@ -22,7 +22,7 @@ public interface AdminService {
     void topForum(String role, AdminStatusDTO adminStatusDTO);
 
     /** 删除帖子 */
-    void deleteForum(String role, Integer tid);
+    void deleteForum(Integer uid,String role, Integer tid);
 
     /** 锁定/解锁帖子 */
     void lockedForum(String role, AdminStatusDTO adminStatusDTO);

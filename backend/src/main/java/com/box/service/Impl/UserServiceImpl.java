@@ -108,8 +108,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public void changePassword(Integer uid, ChangePasswordDTO dto) {
         User user = userMapper.selectById(uid);
-        if (!bCryptPasswordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw new BusinessException("原密码不正确");
+        if (!bCryptPasswordEncoder.matches(dto.getPassword(),user.getPassword())){
+            throw new BusinessException("旧密码错误请重试");
         }
         if (dto.getPassword().equals(dto.getNew_password())) {
             throw new BusinessException("新旧密码不能相同");
@@ -117,7 +117,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!dto.getNew_password().equals(dto.getNew_password_repeat())) {
             throw new BusinessException("两次输入的密码不一致");
         }
-
         user.setPassword(bCryptPasswordEncoder.encode(dto.getNew_password()));
         userMapper.updateById(user);
     }

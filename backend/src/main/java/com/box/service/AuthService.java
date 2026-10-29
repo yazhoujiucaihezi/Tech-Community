@@ -29,7 +29,7 @@ public interface AuthService extends IService<User> {
     /**
      * 重置密码校验：校验邮箱与验证码是否有效
      */
-    void resetConfirm(RegisterDTO dto);
+    User resetConfirm(RegisterDTO dto);
 
     /**
      * 重置密码：校验通过后写入新密码

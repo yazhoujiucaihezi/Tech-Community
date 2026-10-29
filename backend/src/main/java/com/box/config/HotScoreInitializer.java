@@ -1,6 +1,6 @@
 package com.box.config;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.box.constant.RedisConstant;
 import com.box.entity.Topic;
 import com.box.mapper.TopicMapper;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +22,11 @@ public class HotScoreInitializer implements CommandLineRunner {
     private final TopicMapper topicMapper;
     private final StringRedisTemplate stringRedisTemplate;
 
-
     @Override
     public void run(String... args) {
-        refreshAll();
+            refreshAll();
     }
+
 
     @Scheduled(cron = "0 */10 * * * ?")  // 每10分钟
     public void scheduledRefresh() {
@@ -34,41 +34,22 @@ public class HotScoreInitializer implements CommandLineRunner {
     }
 
     private void refreshAll(){
-
-        String tmpkey = "forum:hot:post:tmp";
-
-        //1, 清空临时Key
-        stringRedisTemplate.delete(tmpkey);
-
-        //2, 获取7天内的所有帖子
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        List<Topic> allTopics = topicMapper.selectList(
-                new LambdaQueryWrapper<Topic>()
-                        .ge(Topic::getTime, sevenDaysAgo)
-        );
-
-        //3, 遍历帖子，计算分数并写入临时Key
-        for (Topic topic : allTopics) {
-            Integer likeCount = topicMapper.countLikeByTid(topic.getId());
-            Integer collectCount = topicMapper.countCollectByTid(topic.getId());
-            int commentCount = topicMapper.countComments(topic.getId());
-
-            if (likeCount == null) likeCount = 0;
-            if (collectCount == null) collectCount = 0;
-
-            double base = likeCount + commentCount * 3 + collectCount * 2;
-
-            long hours = Duration.between(topic.getTime(), LocalDateTime.now()).toHours();
-
-            double score = base / Math.pow(hours + 2,1.5);
-            stringRedisTemplate.opsForZSet().add(tmpkey, topic.getId().toString(), score);
+        if (stringRedisTemplate.hasKey(RedisConstant.hot_tem)){
+            stringRedisTemplate.delete(RedisConstant.hot_tem);
         }
-        // 4. 原子切换（rename 会覆盖旧 key）
-        if (stringRedisTemplate.hasKey(tmpkey)) {
-            stringRedisTemplate.rename(tmpkey, "forum:hot:post");
-        } else {
-            // 如果没数据，就把旧的榜单清空，防止展示过期数据
-            stringRedisTemplate.delete("forum:hot:post");
+        List<Topic> topics = topicMapper.selectList(null);
+        for (Topic topic : topics) {
+            if (topic.getTime().plusDays(30).isAfter(LocalDateTime.now())){
+                Integer tid = topic.getId();
+                long hours = Duration.between(topic.getTime(),LocalDateTime.now()).toHours();
+                double count = (topicMapper.countLikeByTid(tid) + topicMapper.countCollectByTid(tid)*2 + topicMapper.countComments(tid) * 3)/Math.pow(hours + 2, 1.8);
+                if (count>0) {
+                    stringRedisTemplate.opsForZSet().add(RedisConstant.hot_tem, tid.toString(), count);
+                }
+            }
+        }
+        if (stringRedisTemplate.hasKey(RedisConstant.hot_tem)) {
+            stringRedisTemplate.rename(RedisConstant.hot_tem, RedisConstant.hot);
         }
     }
 }

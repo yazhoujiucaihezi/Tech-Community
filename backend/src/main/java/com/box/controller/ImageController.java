@@ -26,10 +26,12 @@ public class ImageController {
 
     private final UserMapper userMapper;
 
+    private final JwtUtils jwtUtils;
+
     @PostMapping("/avatar")
     public Result<String> avatar(@RequestHeader("Authorization") String authHeader,
                                  @RequestParam("file") MultipartFile file){
-        Integer uid = JwtUtils.getUid(authHeader);
+        Integer uid = jwtUtils.getUid(authHeader);
         User user = userMapper.selectById(uid);
         checkFile(file, user);
 
@@ -59,7 +61,7 @@ public class ImageController {
     public Result<String> cache(@RequestHeader("Authorization") String authHeader,
                                 @RequestParam("file") MultipartFile file){
         //获得uid
-        Integer uid = JwtUtils.getUid(authHeader);
+        Integer uid = jwtUtils.getUid(authHeader);
         User user = userMapper.selectById(uid);
         //查看user和file是否为null
         checkFile(file, user);

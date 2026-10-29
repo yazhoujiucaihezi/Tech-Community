@@ -35,6 +35,7 @@ public class AdminServiceImpl implements AdminService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmailMapper emailMapper;
     private final AuthServiceImpl authServiceImpl;
+    private final ForumServiceImpl forumService;
 
     /**
      * 获取论坛帖子列表
@@ -67,18 +68,14 @@ public class AdminServiceImpl implements AdminService {
      * 删除帖子
      */
     @Override
-    public void deleteForum(String role, Integer tid) {
+    public void deleteForum(Integer uid,String role, Integer tid) {
         checkRole(role);
         Topic topic = topicMapper.selectById(tid);
         if (topic == null) {
             throw new RuntimeException("帖子不存在");
         }
-
-        topicMapper.deleteCommentByTid(tid);
-        topicMapper.deleteLikeByTid(tid);
-        topicMapper.deleteCollectByTid(tid);
-        topicMapper.deleteById(tid);
-    }
+        forumService.deleteTopic(uid,role,tid);
+        }
 
     /**
      * 锁定/解锁帖子
@@ -224,7 +221,8 @@ public class AdminServiceImpl implements AdminService {
         if (user == null) {
             throw new RuntimeException("用户不存在");
         }
-        user.setPassword(bCryptPasswordEncoder.encode(dto.getNewPassword()));
+        //TODO   2. 重置后应让该用户已签发的令牌失效（思考：无状态令牌怎么做）
+        user.setPassword(bCryptPasswordEncoder.encode(dto.getNewPassword())); // TODO A-8: 替换为哈希结果
         userMapper.updateById(user);
     }
 

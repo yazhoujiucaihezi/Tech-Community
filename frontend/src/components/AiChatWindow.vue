@@ -40,7 +40,7 @@ const sendMessage = () => {
             .slice(0, messages.value.length - 1)
             .map(msg => ({
                 role: msg.type, // 'user' 或 'assistant'
-                text: msg.text
+                content: msg.text
             }))
 
         apiChatWithAI(context, text => {

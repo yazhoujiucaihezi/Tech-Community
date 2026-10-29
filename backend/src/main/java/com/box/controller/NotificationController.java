@@ -18,25 +18,26 @@ import java.util.List;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final JwtUtils jwtUtils;
 
     /** 获取通知列表 */
     @GetMapping("list")
     public Result<List<Notification>> list(@RequestHeader("Authorization") String authHeader) {
-        return Result.success(notificationService.list(JwtUtils.getUid(authHeader)));
+        return Result.success(notificationService.list(jwtUtils.getUid(authHeader)));
     }
 
     /** 删除单条通知 */
     @GetMapping("/delete")
     public Result<Void> delete(@RequestHeader("Authorization") String authHeader,
                                @RequestParam Integer id) {
-        notificationService.delete(JwtUtils.getUid(authHeader), id);
+        notificationService.delete(jwtUtils.getUid(authHeader), id);
         return Result.success(null);
     }
 
     /** 删除全部通知 */
     @GetMapping("/delete-all")
     public Result<Void> deleteAll(@RequestHeader("Authorization") String authHeader) {
-        notificationService.deleteAll(JwtUtils.getUid(authHeader));
+        notificationService.deleteAll(jwtUtils.getUid(authHeader));
         return Result.success(null);
     }
 }

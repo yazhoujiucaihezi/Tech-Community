@@ -10,6 +10,12 @@ import java.io.Serializable;
 @Accessors(chain = true)
 public class NotificationMessage implements Serializable {
 
+    /**
+     * 消息唯一标识，用于消费端幂等去重。
+     * 规则：事件类型 + 业务主键，例如 comment:123 / like:4:32
+     */
+    private String msgId;
+
     // 接收者用户 ID
     private Integer uid;
 

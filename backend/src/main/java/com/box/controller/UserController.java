@@ -21,13 +21,14 @@ import com.box.utils.JwtUtils;
 public class UserController {
 
     private final UserService userService;
+    private final JwtUtils jwtUtils;
 
     /**
      * 获取当前登录用户信息
      */
     @GetMapping("/info")
     public Result<TopicUserVO> info(@RequestHeader("Authorization") String authHeader) {
-        return Result.success(userService.getInfo(JwtUtils.getUid(authHeader)));
+        return Result.success(userService.getInfo(jwtUtils.getUid(authHeader)));
     }
 
     /**
@@ -36,7 +37,7 @@ public class UserController {
     @PostMapping("/save-privacy")
     public Result<Void> savePrivacy(@RequestHeader("Authorization") String authHeader,
                                     @RequestBody UserPrivacyDTO dto) {
-        userService.savePrivacy(JwtUtils.getUid(authHeader), dto);
+        userService.savePrivacy(jwtUtils.getUid(authHeader), dto);
         return Result.success(null);
     }
 
@@ -45,7 +46,7 @@ public class UserController {
      */
     @GetMapping("/details")
     public Result<TopicUserVO> details(@RequestHeader("Authorization") String authHeader) {
-        return Result.success(userService.getDetails(JwtUtils.getUid(authHeader)));
+        return Result.success(userService.getDetails(jwtUtils.getUid(authHeader)));
     }
 
     /**
@@ -53,7 +54,7 @@ public class UserController {
      */
     @GetMapping("/privacy")
     public Result<UserPrivacy> privacy(@RequestHeader("Authorization") String authHeader) {
-        return Result.success(userService.getPrivacy(JwtUtils.getUid(authHeader)));
+        return Result.success(userService.getPrivacy(jwtUtils.getUid(authHeader)));
     }
 
     /**
@@ -62,7 +63,7 @@ public class UserController {
     @PostMapping("/save-details")
     public Result<Void> saveDetails(@RequestHeader("Authorization") String authHeader,
                                     @RequestBody UserDetailDTO userDetailDTO) {
-        userService.saveDetails(JwtUtils.getUid(authHeader), userDetailDTO);
+        userService.saveDetails(jwtUtils.getUid(authHeader), userDetailDTO);
         return Result.success(null);
     }
 
@@ -72,7 +73,7 @@ public class UserController {
     @PostMapping("/change-password")
     public Result<Void> changePassword(@RequestHeader("Authorization") String authHeader,
                                        @RequestBody ChangePasswordDTO changePasswordDTO) {
-        userService.changePassword(JwtUtils.getUid(authHeader), changePasswordDTO);
+        userService.changePassword(jwtUtils.getUid(authHeader), changePasswordDTO);
         return Result.success(null);
     }
 
@@ -82,7 +83,7 @@ public class UserController {
     @PostMapping("/modify-email")
     public Result<Void> modifyEmail(@RequestHeader("Authorization") String authHeader,
                                     @RequestBody RegisterDTO dto) {
-        userService.modifyEmail(JwtUtils.getUid(authHeader), dto);
+        userService.modifyEmail(jwtUtils.getUid(authHeader), dto);
         return Result.success(null);
     }
 }

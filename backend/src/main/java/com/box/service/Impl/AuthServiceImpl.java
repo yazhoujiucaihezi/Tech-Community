@@ -17,12 +17,16 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -44,42 +48,37 @@ public class AuthServiceImpl extends ServiceImpl<AuthMapper, User> implements Au
 
     private final EmailMapper emailMapper;
 
+    @Value("${jwt.secret}")
+    private String secret;
     /**
      * 用户登录
      */
     @Override
     public LoginVO login(LoginDTO dto){
-
-        Date expire = new Date(System.currentTimeMillis() + 7 * 24 * 3600 * 1000);
-
+        LoginVO vo = new LoginVO();
         User user = authMapper.selectOne(
                 new LambdaQueryWrapper<User>().eq(User::getUsername, dto.getUsername())
         );
-        if(user == null){
-            throw new BusinessException("没找到用户");
+        if(user == null || !bCryptPasswordEncoder.matches(dto.getPassword(), user.getPassword())){
+            throw new BusinessException("账号不存在或密码错误");
         }
         if (user.getBanned() == 1){
             throw new BusinessException("账号已封禁");
         }
 
-        boolean password = bCryptPasswordEncoder.matches(dto.getPassword(), user.getPassword());
-
-        if(!password){
-            throw new BusinessException("密码错误");
-        }
-
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        Date date = new Date(System.currentTimeMillis() + 7 * 24 * 3600 * 1000L);
         String token = Jwts.builder()
+                .claim("uid", user.getId())
                 .claim("username", user.getUsername())
                 .claim("role", user.getRole())
-                .claim("uid", user.getId())
-                .expiration(expire)
-                .signWith(Keys.hmacShaKeyFor("box-forum-secret-key-1234567890abcdef".getBytes()))
+                .expiration(date)
+                .signWith(key)
                 .compact();
-        LoginVO vo = new LoginVO();
-        vo.setUsername(user.getUsername());
         vo.setToken(token);
+        vo.setExpire(date);
         vo.setRole(user.getRole());
-        vo.setExpire(expire);
+        vo.setUsername(user.getUsername());
         return vo;
     }
 
@@ -88,15 +87,21 @@ public class AuthServiceImpl extends ServiceImpl<AuthMapper, User> implements Au
      */
     @Override
     public void askCode(String email, String type){
+        if (stringRedisTemplate.opsForValue().get(email+"Repeat") != null){
+            throw new BusinessException("请稍后再试");
+        }
         EmailRecord emailRecord = new EmailRecord();
-        //生成六位验证码
-        int code = (int)((Math.random() * 9 + 1) * 100000);
-        stringRedisTemplate.opsForValue().set(
-                email+":"+type,
-                String.valueOf(code),
-                3,
-                TimeUnit.MINUTES);
-        SimpleMailMessage message = getSimpleMailMessage(email, type, code);
+        SecureRandom secureRandom = new SecureRandom();
+        String failKey = email+":"+type+"fail_count";
+        if ("register".equals(type) && authMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail,email)) != null) {
+            stringRedisTemplate.delete(email+":"+ "register");
+            stringRedisTemplate.delete(failKey);
+            stringRedisTemplate.opsForValue().set(email+"Repeat","mj",1,TimeUnit.MINUTES);
+            throw new BusinessException("邮箱已存在");
+        }
+        if (stringRedisTemplate.opsForValue().get(failKey)!=null){
+            stringRedisTemplate.delete(email+":"+type+"fail_count");
+        }
         if ("reset".equals(type)) {
             User user = authMapper.selectOne(
                     new LambdaQueryWrapper<User>().eq(User::getEmail, email)
@@ -105,7 +110,9 @@ public class AuthServiceImpl extends ServiceImpl<AuthMapper, User> implements Au
                 throw new BusinessException("该邮箱未注册");
             }
         }
-        BeanUtils.copyProperties(emailRecord, message);
+        int code = 100000 + secureRandom.nextInt(900000);
+        SimpleMailMessage message = getSimpleMailMessage(email, type, code);
+        BeanUtils.copyProperties(message,emailRecord);
         emailRecord.setContent(message.getText());
         emailRecord.setTime(LocalDateTime.now());
         emailRecord.setStatus(1);
@@ -113,6 +120,7 @@ public class AuthServiceImpl extends ServiceImpl<AuthMapper, User> implements Au
         emailRecord.setTitle(message.getSubject());
         emailMapper.insert(emailRecord);
         javaMailSender.send(message);
+        stringRedisTemplate.opsForValue().set(email+":"+type, String.valueOf(code),3, TimeUnit.MINUTES);
     }
 
 
@@ -121,22 +129,11 @@ public class AuthServiceImpl extends ServiceImpl<AuthMapper, User> implements Au
      */
     @Override
     public void register(RegisterDTO dto) {
-        String code = stringRedisTemplate.opsForValue().get(dto.getEmail() + ":register");
-        if (code == null) {
-            throw new BusinessException("验证码已过期");
-        }
-        if (!code.equals(dto.getCode())) {
-            throw new BusinessException("验证码错误");
-        }
-        if (authMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, dto.getEmail())) != null) {
-            throw new BusinessException("邮箱已存在");
-        }
-        if (authMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, dto.getUsername())) != null) {
+        verifyCode(dto.getCode(),dto.getEmail(),"register");
+        if (authMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername,dto.getUsername())) != null) {
             throw new BusinessException("用户名已存在");
         }
-
-        // 加密密码
-        String encoded = bCryptPasswordEncoder.encode(dto.getPassword());
+        String encoded =bCryptPasswordEncoder.encode(dto.getPassword());
 
         User user = new User();
         user.setUsername(dto.getUsername());
@@ -158,14 +155,11 @@ public class AuthServiceImpl extends ServiceImpl<AuthMapper, User> implements Au
      */
     @Override
     public void resetPassword(RegisterDTO dto) {
-        User user = authMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, dto.getEmail()));
-        if (user == null) {
-            throw new BusinessException("用户不存在");
-        }
-        String encoded = bCryptPasswordEncoder.encode(dto.getPassword());
+        User user = resetConfirm(dto);
+        String encoded =bCryptPasswordEncoder.encode(dto.getPassword());
         user.setPassword(encoded);
         authMapper.updateById(user);
-        stringRedisTemplate.delete(dto.getEmail() + ":reset");
+        stringRedisTemplate.delete(dto.getEmail()+":"+"reset");
         emailStatus(dto);
     }
 
@@ -198,19 +192,43 @@ public class AuthServiceImpl extends ServiceImpl<AuthMapper, User> implements Au
      * 重置密码校验
      */
     @Override
-    public void resetConfirm(RegisterDTO dto) {
+    public User resetConfirm(RegisterDTO dto) {
         User user = authMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, dto.getEmail()));
         if (user == null) {
+            stringRedisTemplate.opsForValue().set(dto.getEmail()+"Repeat","mj",1,TimeUnit.MINUTES);
             throw new BusinessException("邮箱不存在");
         }
-        String code = stringRedisTemplate.opsForValue().get(dto.getEmail() + ":reset");
-        if (code == null) {
-            throw new BusinessException("验证码已过期");
-        }
-        if (!code.equals(dto.getCode())) {
-            throw new BusinessException("验证码错误");
-        }
+        verifyCode(dto.getCode(),dto.getEmail(),"reset");
+        return user;
     }
 
+    //------方法------
+
+    private void verifyCode(String code,String email,String type){
+        String rightCode = stringRedisTemplate.opsForValue().get(email +":"+ type);
+        String failKey = email+":"+type+"fail_count";
+        if (rightCode == null) {
+            throw new BusinessException("验证码已失效");
+        }
+        if (code == null){
+            throw new BusinessException("请输入验证码");
+        }
+        if (!code.equals(rightCode)) {
+            Long increment = stringRedisTemplate.opsForValue().increment(failKey);
+
+            if (increment != null && increment == 1) {
+                stringRedisTemplate.expire(failKey, 15, TimeUnit.MINUTES);
+            }
+
+            if (increment!=null && increment == 5){
+                stringRedisTemplate.delete(email +":"+ type);
+                stringRedisTemplate.delete(failKey);
+                throw new BusinessException("验证码错误次数过多,请重发验证码");
+            }
+
+            long remainCount = 5 - (increment == null ? 1 : increment);
+            throw new BusinessException("验证码错误,您还有" + remainCount +"次机会");
+        }
+    }
 
 }

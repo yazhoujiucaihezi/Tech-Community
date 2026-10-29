@@ -1,12 +1,10 @@
 package com.box.service.Impl;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.box.config.RabbitMQConfig;
+import com.box.constant.RedisConstant;
 import com.box.dto.CommentDTO;
 import com.box.dto.NotificationMessage;
 import com.box.dto.TopicUpdateDTO;
@@ -18,24 +16,29 @@ import com.box.vo.CommentVO;
 import com.box.vo.TopicDetailVO;
 import com.box.vo.TopicInteractVO;
 import com.box.vo.TopicUserVO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 论坛板块服务实现
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements ForumService {
 
     private final TopicMapper topicMapper;
@@ -45,6 +48,8 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
     private final UserDetailMapper userDetailMapper;
     private final RabbitTemplate rabbitTemplate;
     private final StringRedisTemplate stringRedisTemplate;
+    private final ObjectMapper objectMapper;
+
     /**
      * 获取帖子类型
      */
@@ -129,44 +134,65 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
 
         if ("like".equals(type)) {
             if (state) {
-                topicMapper.addLike(tid, uid);
+                int i = topicMapper.addLike(tid, uid);
 
-                Topic topic = topicMapper.selectById(tid);
-                if (topic != null && !topic.getUid().equals(uid)) {
-                    NotificationMessage message = new NotificationMessage();
-                    message.setUid(topic.getUid());
-                    message.setTitle("收到新点赞");
-                    message.setContent(username + " 点赞了你的帖子《" + topic.getTitle() + "》");
-                    message.setType("like");
-                    message.setUrl("/index/topic-detail/" + topic.getId());
-                    rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
+                if (i > 0) {
+                    TopicUserVO topicUser = topicMapper.getTopicUser(tid);
+                    Topic topic = topicMapper.selectById(tid);
+                    if (!Objects.equals(topicUser.getId(), uid)) {
+                        NotificationMessage message = new NotificationMessage();
+                        message.setMsgId("like:" + uid + ":" + tid);
+                        message.setUid(topicUser.getId())
+                                .setTitle(topic.getTitle())
+                                .setUrl("/index/topic-detail/" + tid)
+                                .setType(type)
+                                .setContent(username + " 赞了你的帖子");
+                        try {
+                            rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
+                        } catch (Exception e) {
+                            log.error("点赞通知失败,tid->{}", tid, e);
+                        }
+                    }
                     incrementScore(tid, 1);
                 }
             } else {
-                topicMapper.removeLike(tid, uid);
-                incrementScore(tid, -1);
+                int i = topicMapper.removeLike(tid, uid);
+
+                if (i > 0) {
+                    incrementScore(tid, -1);
+                }
             }
         } else if ("collect".equals(type)) {
             if (state) {
-                topicMapper.addCollect(tid, uid);
-
-                Topic topic = topicMapper.selectById(tid);
-                if (topic != null && !topic.getUid().equals(uid)) {
-                    NotificationMessage message = new NotificationMessage();
-                    message.setUid(topic.getUid());
-                    message.setTitle("收到新收藏");
-                    message.setContent(username + " 收藏了你的帖子《" + topic.getTitle() + "》");
-                    message.setType("collect");
-                    message.setUrl("/index/topic-detail/" + topic.getId());
-                    rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
+                int i = topicMapper.addCollect(tid, uid);
+                if (i > 0) {
+                    TopicUserVO topicUser = topicMapper.getTopicUser(tid);
+                    Topic topic = topicMapper.selectById(tid);
+                    if (!Objects.equals(topicUser.getId(), uid)) {
+                        NotificationMessage message = new NotificationMessage();
+                        message.setMsgId("collect:" + uid + ":" + tid);
+                        message.setUid(topicUser.getId())
+                                .setTitle(topic.getTitle())
+                                .setUrl("/index/topic-detail/" + tid)
+                                .setType(type)
+                                .setContent(username + " 收藏了你的帖子");
+                        try {
+                            rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
+                        } catch (Exception e) {
+                            log.error("收藏通知失败,tid->{}", tid, e);
+                        }
+                    }
                     incrementScore(tid, 2);
                 }
             } else {
-                topicMapper.removeCollect(tid, uid);
-                incrementScore(tid, -2);
+                int i = topicMapper.removeCollect(tid, uid);
+                if (i > 0) {
+                    incrementScore(tid, -2);
+                }
             }
         }
     }
+
     /**
      * 获取帖子评论信息
      */
@@ -187,7 +213,7 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
             if (topicComment.getQuote() != null && topicComment.getQuote() > 0) {
                 TopicComment quoted = topicCommentMapper.selectById(topicComment.getQuote());
                 if (quoted != null) {
-                    commentVO.setQuote(parseQuillText(quoted.getContent()));
+                    commentVO.setQuote(parseQuillText(quoted.getContent(),20));
                 }
             }
 
@@ -215,7 +241,8 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
      */
     @Override
     public void addComment(Integer uid, CommentDTO commentDTO) {
-        if (userMapper.selectById(uid).getMute() == 1) {
+        User user = userMapper.selectById(uid);
+        if (user.getMute() == 1) {
             throw new BusinessException("乱嘿讲被禁言了舒服吗");
         }
 
@@ -223,35 +250,52 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
         BeanUtils.copyProperties(commentDTO, topicComment);
         topicComment.setTime(LocalDateTime.now());
         topicComment.setUid(uid);
-        topicCommentMapper.insert(topicComment);
-        Topic topic = topicMapper.selectById(commentDTO.getTid());
-        if (topic != null && !topic.getUid().equals(uid)) {
-            NotificationMessage message = new NotificationMessage();
-            message.setUid(topic.getUid());
-            message.setTitle("您的帖子《" + topic.getTitle() + "》有新评论");
-            message.setContent(
-                            userMapper.selectById(uid).getUsername()
-                            + ":" +parseQuillText(topicComment.getContent()));
-            message.setType("comment");
-            message.setUrl("/index/topic-detail/" + topic.getId());
-            rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
+        int i = topicCommentMapper.insert(topicComment);
+
+        if (i > 0) {
+            TopicUserVO topicUser = topicMapper.getTopicUser(commentDTO.getTid());
+            Topic topic = topicMapper.selectById(commentDTO.getTid());
+            Integer quote = commentDTO.getQuote();
+            if (quote != null && quote > 0) {
+                TopicComment comment = topicCommentMapper.selectById(quote);
+                if (!Objects.equals(comment.getUid(), uid)) {
+
+                    if (topicCommentMapper.selectById(quote) == null) {
+                        throw new BusinessException("评论不存在");
+                    }
+                    NotificationMessage message = new NotificationMessage();
+                    message.setMsgId("reply:" + topicComment.getId());
+                    message.setUid(comment.getUid())
+                            .setTitle(topic.getTitle())
+                            .setUrl("/index/topic-detail/" + commentDTO.getTid())
+                            .setType("reply")
+                            .setContent(user.getUsername() + "回复了你的评论:" + plainText(commentDTO.getContent(), 10));
+                    try {
+                        rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
+                    } catch (Exception e) {
+                        log.error("评论通知失败,tid->{}", commentDTO.getTid(), e);
+                    }
+                }
+            } else {
+                if (!Objects.equals(topicUser.getId(), uid)) {
+                    NotificationMessage message = new NotificationMessage();
+                    message.setMsgId("comment:" + topicComment.getId());
+                    message.setUid(topicUser.getId())
+                            .setTitle(topic.getTitle())
+                            .setUrl("/index/topic-detail/" + commentDTO.getTid())
+                            .setType("comment")
+                            .setContent(user.getUsername() + " 评论了你的帖子:" + plainText(commentDTO.getContent(), 20));
+                    try {
+                        rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
+                    } catch (Exception e) {
+                        log.error("评论通知失败,tid->{}", commentDTO.getTid(), e);
+                    }
+                }
+            }
         }
-        if(topicComment.getQuote()>0){
-            Integer replyId = topicCommentMapper.selectById(topicComment.getQuote()).getUid();
-        if (!topicComment.getUid().equals(replyId)) {
-            NotificationMessage message = new NotificationMessage();
-            message.setUid(replyId);
-            message.setTitle("您的评论《" + parseQuillText(topicCommentMapper.selectById(topicComment.getQuote()).getContent()) + "》有新回复");
-            message.setContent(
-                    userMapper.selectById(uid).getUsername()
-                            + ":" + parseQuillText(topicComment.getContent()));
-            message.setType("reply");
-            message.setUrl("/index/topic-detail/" + replyId);
-            rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_QUEUE, message);
-            incrementScore(commentDTO.getTid(), 3);
-        }
-        }
+        incrementScore(commentDTO.getTid(), 3);
     }
+
 
     /**
      * 删除帖子评论
@@ -284,9 +328,8 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
             throw new BusinessException("无权修改");
         }
         BeanUtils.copyProperties(dto, topic);
-        String text = parseQuillText(dto.getContent());
-        String substring = text.substring(0, Math.min(text.length(), 8));
-        topic.setIntro(substring);
+        String text = parseQuillText(dto.getContent(),8);
+        topic.setIntro(text);
         topicMapper.updateById(topic);
     }
 
@@ -301,9 +344,8 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
 
         Topic topic = new Topic();
         BeanUtils.copyProperties(dto, topic);
-        String text = parseQuillText(dto.getContent());
-        String substring = text.substring(0, Math.min(text.length(), 8));
-        topic.setIntro(substring);
+        String text = parseQuillText(dto.getContent(),8);
+        topic.setIntro(text);
         topic.setUid(uid);
         topic.setTime(LocalDateTime.now());
         topicMapper.insert(topic);
@@ -313,6 +355,7 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
      * 删除帖子
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteTopic(Integer uid, String role, Integer tid) {
         Topic topic = topicMapper.selectById(tid);
         if (!"admin".equals(role) && !uid.equals(topic.getUid())) {
@@ -322,7 +365,19 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
         topicMapper.deleteLikeByTid(tid);
         topicMapper.deleteCommentByTid(tid);
         topicMapper.deleteCollectByTid(tid);
-        stringRedisTemplate.opsForZSet().remove("forum:hot:post", tid.toString());
+
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    try {
+                        stringRedisTemplate.opsForZSet().remove(RedisConstant.hot, tid.toString());
+                    } catch (Exception e) {
+                        log.error("热榜移除失败,tid->{}", tid, e);
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -369,17 +424,15 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
 
     @Override
     public List<Topic> getHotTopic() {
-        Set<String> tids = stringRedisTemplate.opsForZSet().reverseRange("forum:hot:post", 0, 9);
-        if (tids == null || tids.isEmpty()) {
-            return new ArrayList<>();   // 直接返回空数组，别去查数据库
+        Set<String> ids = stringRedisTemplate.opsForZSet().reverseRange(RedisConstant.hot, 0, 9);
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
         }
-
-        List<Integer> tidsList = tids.stream().map(Integer::valueOf).toList();
-
-        List<Topic> topics = topicMapper.selectBatchIds(tidsList);
-
-        topics.sort(Comparator.comparingInt(t -> tidsList.indexOf(t.getId())));
+        List<Integer> tids = ids.stream().map(Integer::valueOf).toList();
+        List<Topic> topics = topicMapper.selectBatchIds(tids);
+        topics.sort(Comparator.comparingInt(t -> tids.indexOf(t.getId())));
         return topics;
+
 
     }
 
@@ -394,29 +447,57 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
         return list;
     }
 
-    /** 解析 Quill 富文本为纯文本 */
-    private String parseQuillText(String content) {
-        if (content == null || content.isEmpty()) return "";
-        try {
-            JSONArray ops = JSON.parseObject(content).getJSONArray("ops");
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < ops.size(); i++) {
-                JSONObject op = ops.getJSONObject(i);
-                if (op.containsKey("insert")) {
-                    Object insert = op.get("insert");
-                    if (insert instanceof String) {
-                        sb.append((String) insert);
-                    }
-                }
-            }
-            return sb.toString().trim();
-        } catch (Exception e) {
-            return content;
+    // ========================== 方法 =================================
+
+    // ==================== TODO A-19 富文本转纯文本 ====================
+    // 需求：
+    //   1. 入参是富文本编辑器输出的 JSON，需提取其中所有文本片段并拼接
+    //   2. 忽略非文本片段（图片、视频等嵌入对象）
+    //   3. 解析失败时降级返回原文，不能让发帖接口整体失败
+    //   4. 输出需 trim，长度受控（用于列表页摘要）
+    // 手册：§7.2 富文本存储与 XSS
+    // 自测：纯文本帖摘要正确；含图片的帖摘要不含 JSON 片段；乱码输入不抛异常
+    private String parseQuillText(String content,Integer maxLen) {
+        if (content == null || content.isBlank()) {
+            return "";
+        }
+        return parseDelta(content, maxLen, content);
+    }
+
+    private void incrementScore(Integer tid, double delta) {
+        if (tid != null) {
+            stringRedisTemplate.opsForZSet().incrementScore(RedisConstant.hot, tid.toString(), delta);
         }
     }
 
-    //分数增减
-    private void incrementScore(Integer tid, double delta) {
-        stringRedisTemplate.opsForZSet().incrementScore("forum:hot:post", tid.toString(), delta);
+    private String plainText(String delta, int maxLen) {
+        if (delta == null || delta.isBlank()) {
+            return "";
+        }
+        return parseDelta(delta, maxLen, "");
     }
+
+    private String parseDelta(String delta, int maxLen, String ret) {
+        try {
+            if (delta != null) {
+                JsonNode ops = objectMapper.readTree(delta).path("ops");
+                StringBuilder sb = new StringBuilder();
+                for (JsonNode op : ops) {
+                    JsonNode insert = op.get("insert");
+                    if (insert != null && insert.isTextual()) {
+                        sb.append(insert.asText());
+                    } else if (insert != null && insert.has("image")) {
+                        sb.append("[图片]");
+                    }
+                }
+                String text = sb.toString().replaceAll("\\s+", " ").trim();
+                return text.length() > maxLen ? text.substring(0, maxLen) + "..." : text;
+            }
+            return ret.length() > maxLen ? ret.substring(0, maxLen) + "..." : ret;
+
+        } catch (JsonProcessingException e) {
+            return ret.length() > maxLen ? ret.substring(0, maxLen) + "..." : ret;
+        }
+    }
+
 }
