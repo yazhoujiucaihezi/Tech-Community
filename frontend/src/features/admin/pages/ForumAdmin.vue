@@ -1,8 +1,8 @@
 <script setup>
 import {ref} from "vue";
-import ForumTopicAdmin from "@/views/admin/section/ForumTopicAdmin.vue";
+import ForumTopicAdmin from "@/features/admin/components/ForumTopicAdmin.vue";
 import {apiForumTypes} from "@/api/topic";
-import ForumTopicTypeAdmin from "@/views/admin/section/ForumTopicTypeAdmin.vue";
+import ForumTopicTypeAdmin from "@/features/admin/components/ForumTopicTypeAdmin.vue";
 
 const initTypes = () => apiForumTypes(data => types.value = data)
 const types = ref([])

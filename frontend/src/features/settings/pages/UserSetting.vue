@@ -1,6 +1,6 @@
 <script setup>
 
-import Card from "@/components/Card.vue";
+import Card from "@/shared/components/Card.vue";
 import {Message, Refresh, Select, User} from "@element-plus/icons-vue";
 import {useStore} from "@/stores/general";
 import {computed, onMounted, reactive, ref} from "vue";

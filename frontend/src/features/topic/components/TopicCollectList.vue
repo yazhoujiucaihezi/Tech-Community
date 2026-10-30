@@ -1,8 +1,8 @@
 <script setup>
 import {ref} from "vue";
-import LightCard from "@/components/LightCard.vue";
+import LightCard from "@/shared/components/LightCard.vue";
 import router from "@/router";
-import TopicTag from "@/components/TopicTag.vue";
+import TopicTag from "@/shared/components/TopicTag.vue";
 import {ElMessage} from "element-plus";
 import {apiForumCollect, apiForumCollectDelete} from "@/api/topic";
 

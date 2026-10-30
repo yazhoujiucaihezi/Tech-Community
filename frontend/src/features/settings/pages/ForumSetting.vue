@@ -1,9 +1,9 @@
 <script setup>
 import {apiForumTypes, apiForumUserTopic, apiForumUserTopicDelete} from "@/api/topic";
 import {ref} from "vue";
-import Card from "@/components/Card.vue";
+import Card from "@/shared/components/Card.vue";
 import {useStore} from "@/stores/general";
-import TopicTag from "@/components/TopicTag.vue";
+import TopicTag from "@/shared/components/TopicTag.vue";
 import {Clock, Delete, Hide, Lock} from "@element-plus/icons-vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 

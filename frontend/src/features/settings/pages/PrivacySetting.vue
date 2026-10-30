@@ -1,6 +1,6 @@
 <script setup>
 
-import Card from "@/components/Card.vue";
+import Card from "@/shared/components/Card.vue";
 import {Lock, Setting, Switch} from "@element-plus/icons-vue";
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage} from "element-plus";

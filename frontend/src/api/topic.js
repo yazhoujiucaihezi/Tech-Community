@@ -12,6 +12,14 @@ export const apiForumTopic = (tid, success) =>
 export const apiForumComments = (tid, page, success) =>
     get('/api/forum/comments', {tid, page}, success)
 
+/**
+ * TODO(简历项 3｜采纳答案 + 声望)：后端还没有这两块，需要一起补
+ *  1. db_topic 加 accepted_comment_id，db_comment 加 is_accepted
+ *  2. POST /api/forum/comments/{id}/accept：只有楼主能采纳，一个帖子只能采纳一条
+ *  3. GET /api/user/{id}/stats：采纳数 / 被赞数 / 发帖数，声望 = 采纳×10 + 被赞×2
+ *  4. 前端在评论卡片上加「采纳」按钮（仅楼主可见），个人主页展示声望
+ *  验收：楼主采纳后，评论出现「已采纳」标记，被采纳者声望 +10
+ */
 export const apiForumTopicList = (page, type, success) =>
     get('/api/forum/list-topic', {page, type}, success)
 

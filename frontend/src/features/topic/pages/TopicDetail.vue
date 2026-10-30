@@ -14,14 +14,14 @@
     Star
     } from "@element-plus/icons-vue";
     import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
-    import Card from "@/components/Card.vue";
+    import Card from "@/shared/components/Card.vue";
     import router from "@/router";
-    import TopicTag from "@/components/TopicTag.vue";
-    import InteractButton from "@/components/InteractButton.vue";
+    import TopicTag from "@/shared/components/TopicTag.vue";
+    import InteractButton from "@/features/topic/components/InteractButton.vue";
     import {ElMessage} from "element-plus";
     import {useStore} from "@/stores/general";
-    import TopicEditor from "@/components/TopicEditor.vue";
-    import TopicCommentEditor from "@/components/TopicCommentEditor.vue";
+    import TopicEditor from "@/features/topic/components/TopicEditor.vue";
+    import TopicCommentEditor from "@/features/topic/components/TopicCommentEditor.vue";
     import {
     apiForumCommentDelete,
     apiForumComments,
@@ -61,6 +61,14 @@
     })
     init()
 
+    /**
+     * TODO(简历项 1｜代码高亮)：把 Delta 里的代码块渲染成带语法着色的 <pre>
+     *  1. npm i highlight.js
+     *  2. 下面 convert 完的 HTML 不要直接 v-html，先挂到临时 DOM，遍历 <pre><code>，
+     *     用 hljs.highlightElement(el) 上色后再取 innerHTML
+     *  3. 主题用 github-dark，代码块右上角加「复制」按钮
+     *  验收：老帖子里已有的代码块也能高亮，且不影响非代码内容
+     */
     function convertToHtml(content){
     const ops = JSON.parse(content).ops
     const converter = new QuillDeltaToHtmlConverter(ops, { inlineStyles: true });

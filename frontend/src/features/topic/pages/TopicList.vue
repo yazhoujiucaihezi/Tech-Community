@@ -1,6 +1,6 @@
 <script setup>
 
-import LightCard from "@/components/LightCard.vue";
+import LightCard from "@/shared/components/LightCard.vue";
 import {
     ArrowRightBold,
     Calendar, CircleCheck,
@@ -14,15 +14,15 @@ import {
     Microphone, Picture, Star,
     TrendCharts
 } from "@element-plus/icons-vue";
-import Weather from "@/components/Weather.vue";
+import Weather from "@/features/weather/components/Weather.vue";
 import {computed, onMounted, reactive, ref, watch} from "vue";
 import {ElMessage} from "element-plus";
-import TopicEditor from "@/components/TopicEditor.vue";
+import TopicEditor from "@/features/topic/components/TopicEditor.vue";
 import {useStore} from "@/stores/general";
-import ColorDot from "@/components/ColorDot.vue";
+import ColorDot from "@/shared/components/ColorDot.vue";
 import router from "@/router";
-import TopicTag from "@/components/TopicTag.vue";
-import TopicCollectList from "@/components/TopicCollectList.vue";
+import TopicTag from "@/shared/components/TopicTag.vue";
+import TopicCollectList from "@/features/topic/components/TopicCollectList.vue";
 import {apiForumTopicList, apiForumTopTopics, apiForumWeather, apiForumHotTopics} from "@/api/topic";
 
 const store = useStore();

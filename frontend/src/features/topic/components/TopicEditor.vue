@@ -8,10 +8,17 @@ import axios from "axios";
 import ImageResize from "quill-image-resize-vue";
 import { ImageExtend, QuillWatch } from "quill-image-super-solution-module";
 import {accessHeader} from "@/api/request";
-import ColorDot from "@/components/ColorDot.vue";
+import ColorDot from "@/shared/components/ColorDot.vue";
 import {useStore} from "@/stores/general";
 import {apiForumTopicCreate} from "@/api/topic";
 
+/**
+ * TODO(简历项 4｜代码块插入)：技术社区的编辑器必须能贴代码
+ *  1. Quill 自定义 blot（CodeBlock），toolbar 加一个「</>」按钮 + 语言下拉
+ *  2. 插入时写入 { insert: "代码", attributes: { 'code-block': 'java' } }，保留语言标记
+ *  3. 和 TopicDetail 的高亮逻辑对齐：language 存在 Delta 的 attributes 里
+ *  验收：编辑器插入 java 代码块 → 发帖 → 详情页显示为深色高亮代码
+ */
 const emit= defineEmits(['close','success'])
 
 const store = useStore();

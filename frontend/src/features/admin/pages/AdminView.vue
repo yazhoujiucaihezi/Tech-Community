@@ -15,7 +15,7 @@ import {
 import {get} from "@/api/request";
 import {useStore} from "@/stores/general";
 import {inject, onMounted, ref} from "vue";
-import UserInfo from "@/components/UserInfo.vue";
+import UserInfo from "@/features/user/components/UserInfo.vue";
 import router from "@/router";
 import {useRoute} from "vue-router";
 

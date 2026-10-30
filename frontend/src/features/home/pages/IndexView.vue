@@ -8,12 +8,20 @@ import {
     Search,
     Umbrella, User, WindPower
 } from "@element-plus/icons-vue";
-import LightCard from "@/components/LightCard.vue";
-import UserInfo from "@/components/UserInfo.vue";
+import LightCard from "@/shared/components/LightCard.vue";
+import UserInfo from "@/features/user/components/UserInfo.vue";
 import {apiNotificationDelete, apiNotificationDeleteAll, apiNotificationList} from "@/api/notification";
-import AiChatWindow from "@/components/AiChatWindow.vue";
+/**
+ * TODO(简历项 6｜首页改版)：现在是「左导航 + 帖子流 + 右侧栏（热榜/公告/天气/AI）」的论坛布局
+ *  目标：技术社区的三段式 —— 今日热帖 / 板块入口 / 面试复盘精选
+ *  1. 删掉 AiChatWindow（挪成独立页 /code-review）
+ *  2. Weather 挪到页脚，不占首屏
+ *  3. 板块入口直接用 store.forum.types 渲染，点击跳 /boards/:type
+ *  4. 三段都用同一个 ListRow 组件（标题 + 板块 + 作者 + 回复数 + 时间）
+ */
+import AiChatWindow from "@/features/ai/components/AiChatWindow.vue";
 import {apiForumTypes, apiTopicSearch} from "@/api/topic";
-import TopicTag from "@/components/TopicTag.vue";
+import TopicTag from "@/shared/components/TopicTag.vue";
 import {useStore} from "@/stores/general";
 import router from "@/router";
 

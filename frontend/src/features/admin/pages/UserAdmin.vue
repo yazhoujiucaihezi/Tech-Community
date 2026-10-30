@@ -4,7 +4,7 @@ import {EditPen, Search, Unlock, User} from "@element-plus/icons-vue";
 import {apiUserList, apiUserModifyPassword} from "@/api/admin";
 import {reactive, ref, watchEffect} from "vue";
 import {useStore} from "@/stores/general";
-import UserEditor from "@/components/UserEditor.vue";
+import UserEditor from "@/features/user/components/UserEditor.vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 
 const editorRef = ref()
