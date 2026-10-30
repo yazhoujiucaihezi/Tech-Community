@@ -128,22 +128,9 @@
 
 <template>
     <div class="topic-page" v-if="topic.data">
-        <div class="topic-main" style="position: sticky;top: 0;z-index: 10">
-            <card style="display: flex;width: 100%">
-                <el-button :icon="ArrowLeft" type="info" size="small"
-                           plain round @click="router.push('/index')">返回列表</el-button>
-                <div style="text-align: center;flex: 1">
-                    <el-tag size="small" effect="dark" type="warning" disable-transitions
-                            style="margin-right: 10px;" v-if="topic.data.locked">
-                        <el-icon>
-                            <Lock />
-                        </el-icon>
-                        已锁定
-                    </el-tag>
-                    <topic-tag :type="topic.data.type" />
-                    <span style="font-weight: bold;margin-left: 5px">{{topic.data.title}}</span>
-                </div>
-            </card>
+        <div class="topic-bar">
+            <el-button link :icon="ArrowLeft" @click="router.push('/index')">返回列表</el-button>
+            <span class="bar-title">{{ topic.data.title }}</span>
         </div>
         <div class="topic-main">
             <div class="topic-main-left">
@@ -203,55 +190,31 @@
             </div>
         </div>
         <transition name="el-fade-in-linear" mode="out-in">
-            <div v-if="topic.comments">
-                <div class="topic-main" style="margin-top: 10px" v-for="item in topic.comments">
-                    <div class="topic-main-left">
-                        <el-avatar :src="store.avatarUserUrl(item.user.avatar)"
-                                   :size="60" />
-                        <div>
-                            <div style="font-size: 18px;font-weight: bold">
-                                {{item.user.username}}
-                                <span style="color: hotpink" v-if="item.user.gender === 1">
-                                    <el-icon><Female /></el-icon>
-                                </span>
-                                <span style="color: dodgerblue" v-if="item.user.gender === 0">
-                                    <el-icon><Male /></el-icon>
-                                </span>
-                            </div>
-                            <div class="desc">{{item.user.email}}</div>
+            <div class="comment-list" v-if="topic.comments">
+                <div class="comment-row" v-for="(item, index) in topic.comments" :key="item.id">
+                    <el-avatar :src="store.avatarUserUrl(item.user.avatar)" :size="32"/>
+                    <div class="comment-body">
+                        <div class="comment-head">
+                            <span class="comment-user">{{ item.user.username }}</span>
+                            <span class="faint">{{ new Date(item.time).toLocaleString() }}</span>
+                            <span class="floor">#{{ (topic.page - 1) * 10 + index + 1 }}</span>
                         </div>
-                        <el-divider style="margin: 10px 0" />
-                        <div style="text-align: left;margin: 0 5px">
-                            <div class="desc">微信号: {{item.user.wx || '已隐藏或未填写'}}</div>
-                            <div class="desc">QQ号: {{item.user.qq || '已隐藏或未填写'}}</div>
-                            <div class="desc">手机号: {{item.user.phone || '已隐藏或未填写'}}</div>
-                        </div>
-                    </div>
-                    <div class="topic-main-right">
-                        <div>
-
-                        </div>
-                        <div style="font-size: 13px;color: grey">
-                            <div>评论时间: {{new Date(item.time).toLocaleString()}}</div>
-                        </div>
-                        <div v-if="item.quote" class="comment-quote">
-                            回复: {{item.quote}}
-                        </div>
+                        <div class="comment-quote" v-if="item.quote">{{ item.quote }}</div>
                         <div class="topic-content" v-html="convertToHtml(item.content)"></div>
-                        <div style="text-align: right">
-                            <el-link :icon="ChatSquare" @click="comment.show = true;comment.quote = item"
-                                     type="info">&nbsp;回复评论</el-link>
-                            <el-link :icon="Delete" type="danger"
+                        <div class="comment-actions">
+                            <el-link :icon="ChatSquare" type="info" :underline="false"
+                                     @click="comment.show = true; comment.quote = item">回复</el-link>
+                            <el-link :icon="Delete" type="danger" :underline="false"
                                      v-if="item.user.id === store.user.id || topic.data.user.id === store.user.id || store.user.role === 'admin'"
-                                     style="margin-left: 20px" @click="deleteComment(item.id)">&nbsp;删除评论</el-link>
+                                     @click="deleteComment(item.id)">删除</el-link>
                         </div>
                     </div>
                 </div>
-                <div style="width: fit-content;margin: 20px auto">
+                <div class="pager">
                     <el-pagination background layout="prev, pager, next"
                                    v-model:current-page="topic.page" @current-change="loadComments"
                                    :total="topic.data.comments" :page-size="10"
-                                   hide-on-single-page />
+                                   hide-on-single-page/>
                 </div>
             </div>
         </transition>
@@ -268,83 +231,173 @@
 </template>
 
 <style scoped>
-.comment-quote {
-  font-size: 13px;
-  color: grey;
-  background-color: rgba(94, 94, 94, 0.1);
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 5px;
-}
-
-.add-comment {
-  position: fixed;
-  bottom: 40px;
-  right: 40px;
-  width: 80px;
-  height: 40px;
-  border-radius: 20px;
-  font-size: 14px;
-  color: #fff;
-  text-align: center;
-  line-height: 40px;
-  background: #409eff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-  z-index: 9999;
-}
-
-.add-comment:hover {
-  background: #66b1ff;
-}
-
 .topic-page {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 10px 0;
+    max-width: var(--main-w);
+    margin: 0 auto;
+    padding: 8px 20px 120px;
+}
+
+.topic-bar {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.bar-title {
+    font-size: 13px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .topic-main {
-  display: flex;
-  border-radius: 7px;
-  margin: 0 auto;
-  background-color: var(--el-bg-color);
-  width: 800px;
+    display: flex;
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
 }
 
 .topic-main-left {
-  width: 200px;
-  padding: 10px;
-  text-align: center;
-  border-right: solid 1px var(--el-border-color);
+    width: 168px;
+    padding: 16px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
 }
 
 .topic-main-left .desc {
-  font-size: 12px;
-  color: grey;
+    font-size: 12px;
+    color: var(--text-muted);
+    word-break: break-all;
 }
 
 .topic-main-right {
-  width: 600px;
-  padding: 10px 20px;
-  display: flex;
-  flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
 }
 
 .topic-content {
-  font-size: 14px;
-  line-height: 22px;
-  opacity: 0.8;
-  flex: 1;
-  word-break: break-word;
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text);
+    flex: 1;
+    word-break: break-word;
 }
 
 .topic-content :deep(img) {
-  max-width: 100% !important;
-  width: auto !important;
-  height: auto !important;
-  display: block;
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    display: block;
+}
+
+/* ---------- 评论楼层 ---------- */
+.comment-list {
+    margin-top: 24px;
+    border-top: 1px solid var(--border);
+}
+
+.comment-row {
+    display: flex;
+    gap: 12px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.comment-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.comment-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.comment-user {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.floor {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-faint);
+}
+
+.comment-quote {
+    font-size: 13px;
+    color: var(--text-muted);
+    background: var(--bg-subtle);
+    border-left: 2px solid var(--border-strong);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 6px;
+    font-size: 13px;
+}
+
+.pager {
+    display: flex;
+    justify-content: center;
+    padding: 24px 0;
+}
+
+/* ---------- 发评论按钮 ---------- */
+.add-comment {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #fff;
+    background: var(--accent);
+    cursor: pointer;
+    z-index: 9999;
+}
+
+.add-comment:hover {
+    background: var(--accent-hover);
+}
+
+@media (max-width: 768px) {
+    .topic-page {
+        padding: 8px 12px 100px;
+    }
+
+    .topic-main {
+        flex-direction: column;
+    }
+
+    .topic-main-left {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
 }
 </style>
 <style>

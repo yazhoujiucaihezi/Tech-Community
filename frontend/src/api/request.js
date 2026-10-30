@@ -80,7 +80,15 @@ function request(method, url, payload, success, failure = defaultFailure) {
     })
 }
 
-export const get = (url, success, failure) => request('get', url, undefined, success, failure)
+/** get 的第二个参数可以是 params，也可以直接是成功回调 */
+export const get = (url, params, success, failure) => {
+    if (typeof params === 'function') {
+        failure = success
+        success = params
+        params = undefined
+    }
+    return request('get', url, params, success, failure)
+}
 export const post = (url, data, success, failure) => request('post', url, data, success, failure)
 export const put = (url, data, success, failure) => request('put', url, data, success, failure)
 export const patch = (url, data, success, failure) => request('patch', url, data, success, failure)

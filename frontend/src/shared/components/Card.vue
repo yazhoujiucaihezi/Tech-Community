@@ -26,27 +26,27 @@ defineProps({
 <style scoped>
 
 .card{
-  border-radius: 5px;
-  border: solid 1px var(--el-border-color);
-  background-color: var(--el-bg-color);
+  border-radius: var(--radius);
+  border: solid 1px var(--border);
+  background: var(--bg);
   box-sizing: border-box;
   min-height: 20px;
-  padding: 10px;
+  padding: 16px;
 }
 
 .card-header {
-  border-bottom: solid 1px var(--el-border-color);
-  padding-bottom: 5px;
-  margin-bottom: 10px;
+  border-bottom: solid 1px var(--border);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
 
   &>:first-child {
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 15px;
+    font-weight: 600;
   }
 
   &>:last-child {
-    font-size: 13px;
-    color : grey;
+    font-size: 12px;
+    color: var(--text-muted);
   }
 }
 </style>

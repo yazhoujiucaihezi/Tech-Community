@@ -70,7 +70,8 @@ onMounted(() => {
     <el-container style="height: 100%">
       <el-aside width="230px" class="admin-content-aside">
         <div class="logo-box">
-          <el-image class="logo" src="https://www.gzasc.edu.cn/images/logo_blue.png"/>
+          <img class="logo" src="/brand-logo.png" alt="logo"/>
+          <span class="logo-text">控制台</span>
         </div>
         <el-scrollbar style="height: calc(100vh - 57px)">
           <el-menu
@@ -124,12 +125,21 @@ onMounted(() => {
     border-right: solid 1px var(--el-border-color);
 
     .logo-box {
-      text-align: center;
-      padding: 15px 0 10px;
-      height: 32px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 18px;
+      height: 56px;
+      box-sizing: border-box;
 
       .logo {
-        height: 32px;
+        height: 24px;
+      }
+
+      .logo-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
       }
     }
   }

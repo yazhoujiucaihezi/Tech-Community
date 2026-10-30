@@ -11,6 +11,6 @@
         </keep-alive>
       </transition>
     </router-view>
-    <el-backtop target=".main-content-page .el-scrollbar__wrap" :right="20" :bottom="70"/>
+    <el-backtop :right="24" :bottom="72"/>
   </div>
 </template>

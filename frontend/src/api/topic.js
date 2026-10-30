@@ -20,8 +20,8 @@ export const apiForumComments = (tid, page, success) =>
  *  4. 前端在评论卡片上加「采纳」按钮（仅楼主可见），个人主页展示声望
  *  验收：楼主采纳后，评论出现「已采纳」标记，被采纳者声望 +10
  */
-export const apiForumTopicList = (page, type, success) =>
-    get('/api/forum/list-topic', {page, type}, success)
+export const apiForumTopicList = (page, type, success, failure) =>
+    get('/api/forum/list-topic', {page, type}, success, failure)
 
 export const apiForumTopTopics = (success) =>
     get('/api/forum/top-topic', success)

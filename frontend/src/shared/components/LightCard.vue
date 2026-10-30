@@ -6,8 +6,9 @@
 
 <style scoped>
 .light-card {
-  background-color: var(--el-bg-color);
-  border-radius: 5px;
-  padding: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
 }
 </style>
