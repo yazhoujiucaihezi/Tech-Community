@@ -14,7 +14,7 @@
 
 </div>
 
-> **开发说明**：后端从数据库建模、接口设计到中间件集成为独立实现；前端基于开源工程二次开发并完成全链路联调。
+> **开发说明**：后端从数据库建模、接口设计到中间件集成为独立实现；前端由AI辅助生成。
 
 ---
 
@@ -61,19 +61,18 @@
 
 <div align="center">
 
-<img width="880" alt="首页" src="https://github.com/user-attachments/assets/b0f65128-a015-46ed-996d-7b7a02a2715c" />
-
+<img width="880" alt="首页" src="https://github.com/user-attachments/assets/a681130a-5063-4eb0-8dee-4cb0bfac4d44" />
 <details>
 <summary><b>点击展开更多截图（帖子详情 / 编辑器 / 个人中心 / 管理后台）</b></summary>
 <br>
 
-<img width="880" alt="帖子详情" src="https://github.com/user-attachments/assets/4dec428f-af0f-4f75-8487-a5a3979fb2b9" />
+<img width="880" alt="帖子详情" src="https://github.com/user-attachments/assets/6d65ec68-5402-4f36-8678-a1f022aaa61f" />
 
-<img width="880" alt="发帖编辑器" src="https://github.com/user-attachments/assets/b7380668-2137-4ef3-961e-90e25acc5d21" />
+<img width="880" alt="AI助手" src="https://github.com/user-attachments/assets/bd46a421-37a9-4465-a537-ab78b0b595d0" />
 
-<img width="880" alt="个人中心" src="https://github.com/user-attachments/assets/be70424b-9b3c-4ea9-85f6-d206e30cc28d" />
+<img width="880" alt="帖子管理" src="https://github.com/user-attachments/assets/e1547633-d2d2-4994-aab6-ecbd7a0ea937" />
 
-<img width="880" alt="后台管理" src="https://github.com/user-attachments/assets/281a8fb0-619a-468d-995e-d79c2b3b6dd0" />
+<img width="880" alt="热点redis" src="https://github.com/user-attachments/assets/4b7374e2-d506-4663-9a0c-76e3d2d636d7" />
 
 </details>
 
@@ -292,8 +291,6 @@ DB_PASSWORD=xxx RABBITMQ_PASSWORD=xxx ZHIPU_API_KEY=xxx JWT_SECRET=xxx mvn sprin
 ```
 
 可选环境变量全表：`DB_USERNAME` `DB_PASSWORD` `RABBITMQ_HOST` `RABBITMQ_PORT` `RABBITMQ_USERNAME` `RABBITMQ_PASSWORD` `ZHIPU_API_KEY` `MAIL_USERNAME` `MAIL_PASSWORD` `JWT_SECRET` `UPLOAD_DIR` `QWEATHER_*`
-
-> ⚠️ `*.pem` 私钥、`application-dev.yml`、`.env` 都已在 `.gitignore` 中，**不要用 `git add -f` 强行提交**。
 
 
 ### 四、启动
