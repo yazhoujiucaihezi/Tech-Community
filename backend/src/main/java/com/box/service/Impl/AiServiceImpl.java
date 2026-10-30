@@ -33,7 +33,7 @@ public class AiServiceImpl implements AiService {
 
     /** 系统提示词由服务端固定，不接受前端传入，避免提示词注入 */
     private static final String SYSTEM_PROMPT =
-            "你是校园论坛的助手，只回答与学习、校园生活相关的问题";
+            "你是极客技术社区的助手，只回答与技术学习、求职面试相关的问题";
 
     @Override
     public Flux<String> chat(Integer uid, List<Map<String, Object>> messages) {

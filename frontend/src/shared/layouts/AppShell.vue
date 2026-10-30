@@ -56,8 +56,8 @@ function goBoard(typeId) {
     <div class="shell" v-loading="loading" element-loading-text="正在进入，请稍后...">
         <header class="shell-header">
             <div class="brand" @click="router.push('/index')">
-                <img class="brand-logo" src="/brand-logo.png" alt="亚洲韭菜盒子"/>
-                <span class="brand-name">亚洲韭菜盒子</span>
+                <img class="brand-logo" src="/brand-logo.png" alt="极客技术社区"/>
+                <span class="brand-name">极客技术社区</span>
             </div>
 
             <div class="search-box">

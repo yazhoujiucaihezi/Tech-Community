@@ -197,7 +197,7 @@ public class AuthServiceImpl extends ServiceImpl<AuthMapper, User> implements Au
         message.setTo(email);                     // 收件人
         if ("register".equals(type)) {
             message.setSubject("注册验证邮件");
-            message.setText("您正在注册校园论坛账号，验证码：  " + code + "，3分钟内有效。");
+            message.setText("您正在注册极客技术社区账号，验证码：  " + code + "，3分钟内有效。");
         } else if ("modify".equals(type)) {
             message.setSubject("邮箱修改验证邮件");
             message.setText("您正在绑定新的电子邮箱，验证码：  " + code + "，3分钟内有效。");

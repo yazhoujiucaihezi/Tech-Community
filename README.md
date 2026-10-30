@@ -1,8 +1,8 @@
 <div align="center">
 
-# 校园论坛 Campus Forum
+# 极客技术社区 (Geek Tech Community)
 
-**面向高校场景的社区互动平台 · 前后端分离 · 实时热榜 / 异步通知 / AI 助手**
+**面向校招生与开发者的技术问答社区 · 前后端分离 · 拦截器统一鉴权 / Redis 实时热榜 / RabbitMQ 异步通知 / AI 助教**
 
 ![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.8-6DB33F?style=flat-square)
@@ -10,11 +10,12 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square)
 ![Redis](https://img.shields.io/badge/Redis-7.0-DC382D?style=flat-square)
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.8-FF6600?style=flat-square)
+![Spring AI](https://img.shields.io/badge/Spring%20AI-GLM--4--Flash-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
 </div>
 
-> **开发说明**：后端从数据库建模、接口设计到中间件集成为独立实现；前端基于开源工程二次开发并完成全链路联调。
+> **开发说明**：后端（数据库建模、RESTful API 设计、拦截器鉴权体系、Redis 热榜引擎、RabbitMQ 异步通知、Spring AI 流式接入）为独立设计与实现；前端基于 Vue 3 + Element Plus，按功能域分层重构，UI 层借助 AI 辅助生成。
 
 ---
 
@@ -27,6 +28,7 @@
 - [核心技术实现](#核心技术实现)
 - [项目结构](#项目结构)
 - [快速开始](#快速开始)
+- [路线图](#路线图)
 - [开源协议](#开源协议)
 
 ---
@@ -35,45 +37,45 @@
 
 ### 用户端
 
-| 模块 | 能力 |
+| 模块 | 核心能力 |
 | :--- | :--- |
-| **账号与安全** | 注册、无状态登录（JWT）、BCrypt 密码存储、邮箱验证码、密码找回 |
-| **个人中心** | 资料维护、头像上传、隐私权限设置 |
-| **内容发布** | 富文本发帖（图片按日期归档）、编辑、删除、分类检索 |
-| **互动** | 多级评论与回复、点赞、收藏 |
-| **实时热榜** | Redis ZSet + 时间衰减模型，新帖有曝光、老帖会下沉 |
-| **站内通知** | RabbitMQ 异步投递，点赞 / 收藏 / 评论 / 回复四类消息 |
-| **AI 助手** | SSE 流式对话，逐字返回 |
-| **天气卡片** | 和风天气实况 + 逐小时预报 |
+| **账号与安全** | 邮箱注册、JWT 无状态登录、`BCrypt.matches` 密码校验、Redis 验证码防刷、密码找回、登出即失效（`jti` 黑名单） |
+| **个人中心** | 资料维护、头像上传、隐私开关（联系方式是否对外展示） |
+| **内容发布** | Quill 富文本发帖（Delta JSON 存储）、图片按日期归档、编辑 / 删除、按板块检索、关键词搜索 |
+| **社区互动** | 评论与楼中楼回复、点赞、收藏、收藏夹 |
+| **实时热榜** | Redis ZSet + 时间衰减模型，兼顾新帖曝光与老帖下沉 |
+| **站内通知** | RabbitMQ 异步投递，覆盖点赞 / 收藏 / 评论 / 回复四类事件，Redis 去重 + 唯一索引兜底 |
+| **AI 极客助教** | 智谱 `GLM-4-Flash` + WebFlux `Flux` 流式对话，滑动窗口上下文裁剪、角色白名单过滤、按用户限频 |
+| **环境卡片** | 和风天气 API（Ed25519 签名），实况与逐小时预报 |
 
 ### 管理端
 
-| 模块 | 能力 |
+| 模块 | 核心能力 |
 | :--- | :--- |
-| **内容治理** | 置顶、加精、锁定、屏蔽、删除、版块迁移 |
-| **版块管理** | 分类的增删改查 |
-| **用户管理** | 用户检视、状态管控、密码重置 |
-| **邮件记录** | 发送记录追踪与异常邮件重发 |
+| **内容治理** | 帖子置顶、锁定、隐藏、删除、版块迁移 |
+| **版块管理** | 技术板块（软开 / 嵌入式 / 求助帖 / 求职面试 / 聊公司）的新增与改名 |
+| **用户管理** | 用户检索、详情查看、封禁 / 解封、密码重置（基于 JWT `role` 的两级权限隔离） |
+| **邮件审计** | 验证码邮件发送记录追踪与手动重发 |
 
 ---
 
 ## 界面预览
 
+> 截图放在 `docs/screenshots/` 下，或用 GitHub 编辑器拖拽上传后把 `src` 换成生成的链接。
+
 <div align="center">
 
-<img width="880" alt="首页" src="https://github.com/user-attachments/assets/b0f65128-a015-46ed-996d-7b7a02a2715c" />
+<img width="880" alt="首页" src="docs/screenshots/01-home.png" />
 
 <details>
-<summary><b>点击展开更多截图（帖子详情 / 编辑器 / 个人中心 / 管理后台）</b></summary>
+<summary><b>点击展开更多截图（帖子详情 / 登录 / 管理后台）</b></summary>
 <br>
 
-<img width="880" alt="帖子详情" src="https://github.com/user-attachments/assets/4dec428f-af0f-4f75-8487-a5a3979fb2b9" />
+<img width="880" alt="帖子详情" src="docs/screenshots/02-topic-detail.png" />
 
-<img width="880" alt="发帖编辑器" src="https://github.com/user-attachments/assets/b7380668-2137-4ef3-961e-90e25acc5d21" />
+<img width="880" alt="登录页" src="docs/screenshots/03-login.png" />
 
-<img width="880" alt="个人中心" src="https://github.com/user-attachments/assets/be70424b-9b3c-4ea9-85f6-d206e30cc28d" />
-
-<img width="880" alt="后台管理" src="https://github.com/user-attachments/assets/281a8fb0-619a-468d-995e-d79c2b3b6dd0" />
+<img width="880" alt="管理后台" src="docs/screenshots/04-admin.png" />
 
 </details>
 
@@ -85,21 +87,21 @@
 
 **后端**
 
-| 层次 | 选型 |
+| 层次 | 选型与说明 |
 | :--- | :--- |
-| 语言与框架 | Java 17 · Spring Boot 3.5.8 · Spring Web · Validation |
+| 语言与框架 | Java 17 · Spring Boot 3.5.8 · Spring Web · Jakarta Validation |
 | 持久层 | MyBatis-Plus 3.5.15 · MySQL 8.0 |
-| 缓存 | Redis 7（验证码 TTL · ZSet 热榜） |
-| 消息队列 | RabbitMQ 3.8（异步通知） |
-| AI 与三方 | Spring AI（Reactor 流式）· Spring Mail · 和风天气 API |
-| 安全与工具 | JJWT · BCrypt · FastJSON2 · Lombok · Maven |
+| 缓存 | Redis 7（验证码 TTL · ZSet 热榜 · AI 限频计数 · MQ 消费去重） |
+| 消息队列 | RabbitMQ 3.8（站内通知异步解耦） |
+| AI 与三方集成 | Spring AI（OpenAI 兼容端点对接智谱 `GLM-4-Flash`、`Flux` 响应式流）· Spring Mail · 和风天气 |
+| 安全与工具 | JJWT 0.12.6 · `BCryptPasswordEncoder` · Lombok 1.18.42 · Maven |
 
 **前端**
 
-| 层次 | 选型 |
+| 层次 | 选型与说明 |
 | :--- | :--- |
-| 框架 | Vue 3 · Vue Router · Pinia · Vite |
-| UI 与工具 | Element Plus · Axios · VueQuill |
+| 核心框架 | Vue 3 · Vue Router · Pinia · Vite |
+| UI 与通信 | Element Plus · Axios（统一请求层）· Fetch SSE · VueQuill · `quill-delta-to-html` |
 
 ---
 
@@ -107,107 +109,136 @@
 
 ```mermaid
 flowchart TB
-    subgraph FE["Vue 3 前端"]
+    subgraph FE["Vue 3 前端（用户端 + 管理端）"]
         direction LR
-        UI["Element Plus 组件"]
-        ROUTER["Router + Pinia"]
-        IO["Axios 封装 / SSE 接收"]
+        UI["Element Plus 视图层"]
+        ROUTER["Vue Router + Pinia"]
+        IO["Axios 统一请求层 / Fetch SSE"]
     end
 
     subgraph BE["Spring Boot 3 后端"]
         direction TB
-        C["Controller<br/>参数解析 · 身份提取"]
-        S["Service / Impl<br/>业务编排 · 热度计算 · 上下文裁剪"]
-        M["Mapper<br/>MyBatis-Plus"]
-        C --> S --> M
+        I["LoginInterceptor<br/>OPTIONS 放行 · 验签 · 黑名单校验 · 写入 UserContext"]
+        C["Controller<br/>只从 UserContext 取身份"]
+        S["Service<br/>热榜增量 / 事件发布 / AI 上下文治理"]
+        M["Mapper（MyBatis-Plus）"]
+        I --> C --> S --> M
     end
 
     subgraph MID["中间件"]
-        direction TB
-        R[("Redis<br/>验证码 / 热榜 / 限频")]
+        R[("Redis<br/>jwt 黑名单 / ZSet 热榜 / 限频 / 去重")]
         Q[["RabbitMQ<br/>notification.queue"]]
     end
 
     DB[("MySQL 8.0")]
-    MQ_CONS["NotificationConsumer<br/>去重 · 落库"]
-    AI["大模型 API<br/>OpenAI 兼容"]
+    MQ["NotificationConsumer<br/>SETNX 去重 + msg_id 唯一索引"]
+    AI["智谱 GLM-4-Flash"]
     WEA["和风天气 API"]
 
-    FE -->|"RESTful / SSE"| C
+    FE -->|"RESTful / SSE"| I
     M --> DB
     S --> R
     S --> Q
-    S -->|"Flux 流式"| AI
+    S -->|"Flux<String>"| AI
     S --> WEA
-    Q --> MQ_CONS
-    MQ_CONS --> DB
+    Q --> MQ
+    MQ --> DB
 ```
 
-> 鉴权采用「Controller 方法显式取 `Authorization` 头 → `JwtUtils` 解析」的方式，未收敛到拦截器；集中式拦截器属于后续优化项。
+> **鉴权架构**：身份解析已收敛到 `HandlerInterceptor`。拦截器负责「你是谁」——验签、查 `jti` 黑名单、把 `CurrentUser` 写进 `ThreadLocal`；Controller 只负责「你要干什么」，通过 `UserContext.getUid()` 直接取。授权（能不能操作这条帖子）仍留在 Service 层，因为它和具体资源绑定，属于业务规则。
 
 ---
 
 ## 核心技术实现
 
-### 一、热榜：时间衰减 + 原子切换
+### 一、鉴权收口：拦截器 + ThreadLocal 上下文 + `jti` 黑名单
 
-传统「按累计点赞排序」会让老帖长期霸榜，新帖没有曝光机会。这里用互动量除以时间衰减因子：
+早期实现里每个 Controller 方法都要 `@RequestHeader("Authorization")` 拿 token，再调 `JwtUtils` 解析，29 处重复代码，且**任何一处漏写就等于这个接口没有鉴权**。
 
+改造后：
+
+```text
+请求 → LoginInterceptor.preHandle
+        ├─ OPTIONS 预检：直接放行
+        ├─ 白名单路径（/api/auth/**、公开列表、/images/**）：跳过
+        ├─ jwtUtils.parse(header) 验签 → 拿到 uid / role / jti
+        ├─ 查 Redis jwt:blackList:{jti} → 命中则视为已登出
+        └─ UserContext.set(new CurrentUser(uid, role)) → 放行
+请求结束 → afterCompletion → UserContext.clear()
 ```
-Score = (点赞 × 1 + 评论 × 3 + 收藏 × 2) / (发帖小时数 + 2)^1.8
+
+- **为什么用 ThreadLocal**：一次请求在 Tomcat 里由一个线程跑完，把用户挂在线程上，Service 层不用逐层传参；请求结束必须 `remove`，否则线程复用会串号。
+- **登出即失效**：JWT 本身无状态、签出去撤不回，所以签发时写入 `jti`，登出时把 `jti` 写进 Redis，**TTL 按 `exp` 剩余时间算**，token 过期后黑名单自动清理。
+- **白名单要短且准**：写 `/**` 就必须放过静态资源与预检请求，否则 `<img>` 请求不带 `Authorization` 头会全站 401；写 `/api/**` 则可以让静态资源天然不受影响。
+- **职责边界**：认证是横切的，适合拦截器；授权和资源绑定（这条帖子是不是你的），留在 Service，或用注解 + AOP 按接口标注。
+
+### 二、实时热榜：时间衰减 + RENAME 原子切换 + 内存保序
+
+按累计点赞排序会让老帖长期霸榜，新帖没有曝光机会。本项目用时间衰减计算热度：
+
+```text
+Score = (点赞 × 1 + 收藏 × 2 + 评论 × 3) / (发帖小时数 + 2)^1.8
 ```
 
-- **权重按用户成本递增**：点赞最轻（1）、收藏代表「以后有用」（2）、评论要打字（3）
-- **指数 1.8**：1 衰减太慢、2 又太陡，1.8 是围绕「新帖能压过一天前的帖」这个目标调出来的
-- **增量 + 全量双通道**：互动时实时 `incrementScore`，定时任务全量重算修正漂移
-- **无窗口切换**：重算先写临时 Key，算完 `RENAME` 覆盖线上 Key。`RENAME` 是单条原子命令，中途不存在「两边都没数据」的空档，读者不会看到空榜
+- **权重按行为成本递增**：点赞成本最低（×1）、收藏代表长期参考价值（×2）、评论需要思考输入（×3）。
+- **分母平滑**：`+2` 防止刚发布的帖子分母趋近 0 导致分数畸高；指数 `1.8` 控制衰减斜率，让新帖在 24 小时内有冲击榜单的能力。
+- **增量 + 全量双通道**：互动发生时用 `ZINCRBY` 按权重修正单帖分数（点赞 ±1、收藏 ±2、评论 ±3）；`HotScoreInitializer` 每 10 分钟全量扫描**近 30 天**的帖子重算，启动时也会跑一次。
+- **RENAME 原子切换**：全量重算先写临时 Key `hot_tem`，算完用一条 `RENAME` 覆盖线上 `forum:hot`，避免「先删后建」造成的瞬间空榜。
+- **`IN` 查询 + 内存重排**：从 ZSet 取 Top-N 的帖子 ID 后批量回表，数据库按主键顺序返回会打乱榜单，所以在内存里按原 ID 顺序重排（`O(N)`）。
 
-### 二、通知：异步解耦 + 消费幂等
+### 三、异步通知：主流程解耦 + SETNX 去重 + 唯一索引兜底
 
 ```mermaid
 sequenceDiagram
     participant U as 用户
-    participant S as Service
+    participant S as ForumService
     participant DB as MySQL
     participant MQ as RabbitMQ
-    participant C as Consumer
+    participant R as Redis
+    participant C as NotificationConsumer
 
-    U->>S: 点赞 / 评论
-    S->>DB: 业务落库
-    S->>MQ: 投递通知（try-catch 包裹）
+    U->>S: 点赞 / 收藏 / 评论
+    S->>DB: 互动数据落库
+    S->>MQ: convertAndSend（try-catch 隔离）
     S-->>U: 立即返回
-    MQ->>C: 异步消费
-    C->>C: Redis SETNX 去重
-    C->>DB: 通知落库
+    MQ->>C: 投递消息
+    C->>R: SETNX notify:dedup:{msgId}
+    alt 首次消费
+        C->>DB: 插入通知（msg_id 唯一索引）
+    else 重复投递
+        C-->>MQ: 直接忽略
+    end
 ```
 
-三个关键设计：
+- **故障隔离**：发送端 `try-catch` 包住 `convertAndSend`，RabbitMQ 抖动时点赞、评论主流程照常返回，不被通知拖累。
+- **两层幂等**：消息带确定性业务 ID（`like:{uid}:{tid}`、`comment:{id}`），先用 Redis `SETNX` 拦掉高频重复投递，再由通知表 `msg_id` 唯一索引做最终兜底。
+- **补偿**：写库失败时删掉 SETNX 标记，避免重投时被误判为「已消费」而永久丢通知。
 
-- **主链路不被拖累**：`convertAndSend` 包了 try-catch，MQ 不可用时点赞/评论照样成功
-- **消费端幂等**：消息带业务事件 ID（`comment:123` / `like:4:32`），`SETNX` 挡一层，`msg_id` 唯一索引兜底
-- **失败撤销标记**：入库失败要删掉去重标记，否则重投会被误判成重复，通知永久丢失
+### 四、AI 助教：SSE 流式 + 窗口裁剪 + 防注入
 
-### 三、AI 助手：流式 + 限频 + 上下文治理
+- **流式响应**：`ChatClient.prompt().system(...).stream().content()` 返回 `Flux<String>`，以 `text/event-stream` 推送；前端用 `fetch` + `ReadableStream` 按 `\n\n` 切分事件（`EventSource` 不支持 POST，所以不能直接用）。
+- **滑动窗口**：只保留最近 **5 轮（10 条）** 历史，并校验窗口头部不会残留 `assistant` 消息，控制 Token 成本。
+- **防 Prompt Injection**：只放行 `user` / `assistant` 两种角色，前端伪造的 `system` 一律丢弃；系统提示词由后端强制注入。
+- **限频**：单用户 60 秒内最多 5 次，Redis `INCR` + 首次写入绑定 TTL。
 
-- **SSE 逐字推送**：`ChatClient.prompt().stream().content()` 返回 `Flux<String>`，首字节即可响应。实测首字节 1.84s、完整回答 2.96s，差值就是流式省下的等待
-- **滑动窗口裁剪**：只保留最近 5 轮（10 条消息），并去掉开头可能出现的 assistant 消息 —— 对话以模型发言开头会让模型困惑
-- **角色过滤**：只接受 `user` / `assistant`，前端传 `system` 一律丢弃；系统提示词由服务端固定，防提示词注入
-- **限频**：60 秒窗口 5 次，`increment` 首次建键时设 TTL，之后不重置窗口
+### 五、Quill Delta 解析与降级
 
-### 四、认证与安全
+帖子正文以 Delta JSON 存储，后端封装解析器用于列表摘要与通知预览：
 
-- **无状态认证**：JWT 携带 uid / role，密钥从配置读取并在 `@PostConstruct` 阶段构造 —— 配错会在启动时直接失败，而不是等到第一个请求进来才 500
-- **密码存储**：BCrypt 自适应哈希；注册加密、登录 `matches` 校验、改密校验原密码、后台重置，四条链路统一
-- **验证码防重放**：Redis 存码并设严格 TTL，校验通过立即销毁；连续错 5 次锁定并要求重发
-- **账号枚举防护**：登录失败统一提示「账号或密码错误」，不区分「用户不存在」与「密码错误」
+- 遍历 `ops` 提取纯文本，图片节点替换为 `[图片]`，压平换行后截断。
+- **差异化降级**：列表摘要解析失败返回原文（保证可读），通知预览解析失败返回空串（避免把 JSON 源码推给用户）。
 
-### 五、富文本处理
+### 六、接口语义：写操作一律不用 GET
 
-Quill 输出的是 Delta JSON（`{"ops":[{"insert":"..."}]}`），不能直接当文本用：
+`GET` 删除帖子、`GET` 点赞这类写法，会被浏览器预取、爬虫、`<img src>` 误触发，且不符合 HTTP 语义。全项目整改为：
 
-- **摘要提取**：遍历 `ops` 取文本节点，图片替换为 `[图片]`，压平换行后截断
-- **两种降级策略**：帖子摘要失败返回原文（保住展示），通知摘要失败返回空（空白比乱码好）
-- **长度由调用方决定**：列表摘要 8 字、引用评论 20 字，底层方法只负责抽文本
+| 行为 | 接口 |
+| :--- | :--- |
+| 删帖 / 删评论 | `DELETE /api/forum/topics/{tid}`、`/api/forum/comments/{id}` |
+| 点赞 / 收藏 | `POST /api/forum/interactions`（body 显式传 `state`，避免「取反」语义导致重复请求翻转） |
+| 通知已读 | `DELETE /api/notification/{id}`、`/api/notification/all` |
+| 后台删帖 / 改分类 / 重发邮件 | `DELETE` / `PATCH` / `POST` |
+| 登出 / 获取验证码 | `POST /api/auth/logout`、`POST /api/auth/code` |
 
 ---
 
@@ -216,30 +247,31 @@ Quill 输出的是 Delta JSON（`{"ops":[{"insert":"..."}]}`），不能直接�
 ```text
 forum/
 ├── backend/
-│   ├── src/main/java/com/box/
-│   │   ├── common/      统一返回结果封装
-│   │   ├── config/      Redis / RabbitMQ / MyBatis-Plus / 密码编码器
-│   │   ├── constant/    Redis Key 常量
-│   │   ├── consumer/    RabbitMQ 消费者
-│   │   ├── controller/  RESTful 接口
-│   │   ├── dto/         请求对象
-│   │   ├── entity/      数据库实体
-│   │   ├── exception/   业务异常与全局处理
-│   │   ├── mapper/      MyBatis-Plus 数据访问
-│   │   ├── service/     业务接口
-│   │   │   └── Impl/    业务实现
-│   │   ├── utils/       JwtUtils / 天气 JWT 等工具
-│   │   └── vo/          视图对象
-│   └── src/main/resources/
-│       ├── application.yml
-│       └── mapper/      自定义 SQL
+│   ├── forum.sql                        建库脚本（含表结构与初始板块）
+│   └── src/main/java/com/box/
+│       ├── Interceptor/    LoginInterceptor：验签、黑名单、写 UserContext
+│       ├── common/         Result 统一响应、UserContext(ThreadLocal)
+│       ├── config/         WebMvc 注册拦截器 / Redis / RabbitMQ / MyBatis-Plus / 热榜重算任务
+│       ├── constant/       Redis Key 前缀、MQ 常量
+│       ├── consumer/       NotificationConsumer 异步消费
+│       ├── controller/     RESTful 接口（用户端 / 管理端 / AI 流式端点）
+│       ├── dto/            入参对象与校验规则
+│       ├── entity/         数据库实体与 CurrentUser
+│       ├── exception/      BusinessException + 全局异常处理
+│       ├── mapper/         MyBatis-Plus Mapper
+│       ├── service/Impl/   业务实现（热榜、AI 上下文、鉴权）
+│       ├── utils/          JwtUtils / 和风天气 Ed25519 签名
+│       └── vo/             视图对象
 └── frontend/
     └── src/
-        ├── components/  公共组件
-        ├── net/         Axios 封装与接口定义
-        ├── router/      路由
-        ├── store/       Pinia
-        └── views/       页面（用户端 / 管理端）
+        ├── api/            request.js 统一请求层 + 按模块拆分的接口
+        ├── features/       topic / user / admin / auth / settings / home / ai / weather
+        │   ├── pages/      路由页面
+        │   └── components/ 业务组件
+        ├── router/         路由与登录守卫
+        ├── shared/         components（通用组件）、layouts（AppShell）
+        ├── stores/         Pinia 状态
+        └── assets/         tokens.css 设计变量、Quill 样式
 ```
 
 ---
@@ -250,69 +282,68 @@ forum/
 
 | 组件 | 版本 |
 | :--- | :--- |
-| JDK | 17+ |
+| JDK | 17 或 21（用 JDK 23+ 编译需加 `-Dmaven.compiler.proc=full`） |
 | Maven | 3.8+ |
 | MySQL | 8.0+ |
-| Redis | 6.0+ |
+| Redis | 7.0+ |
 | RabbitMQ | 3.8+ |
 | Node.js | 18+ |
 
 ### 二、初始化数据库
 
 ```sql
-CREATE DATABASE forum DEFAULT CHARACTER SET utf8mb4;
+CREATE DATABASE forum DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE forum;
-SOURCE forum.sql;
+SOURCE backend/forum.sql;
 ```
 
-### 三、配置
+### 三、配置（敏感信息不入库）
 
-所有敏感配置都从 `application.yml` 里抽出来了，仓库中只保留占位符，**默认值不含任何密钥**。
+仓库里只有占位符，真实配置放在 `application-dev.yml`（已加入 `.gitignore`）：
 
 ```bash
 cd backend/src/main/resources
 cp application-dev.yml.example application-dev.yml
 ```
 
-然后在 `application-dev.yml` 里填写真实值（这个文件已被 `.gitignore` 忽略，不会提交）：
-
 | 配置项 | 说明 |
 | :--- | :--- |
 | `spring.datasource.password` | MySQL 密码 |
-| `spring.rabbitmq.host / username / password` | RabbitMQ 地址与账号 |
-| `spring.mail.username / password` | QQ 邮箱与 SMTP 授权码 |
-| `spring.ai.openai.api-key` | 大模型 API Key（不用 AI 可留空） |
-| `qweather.*` | 和风天气 host / kid / sub / iss / 私钥路径（不用天气可留空） |
-| `jwt.secret` | JWT 签名密钥，**至少 32 字节** |
-
-也可以不建这个文件，直接用环境变量覆盖：
-
-```bash
-DB_PASSWORD=xxx RABBITMQ_PASSWORD=xxx ZHIPU_API_KEY=xxx JWT_SECRET=xxx mvn spring-boot:run
-```
-
-可选环境变量全表：`DB_USERNAME` `DB_PASSWORD` `RABBITMQ_HOST` `RABBITMQ_PORT` `RABBITMQ_USERNAME` `RABBITMQ_PASSWORD` `ZHIPU_API_KEY` `MAIL_USERNAME` `MAIL_PASSWORD` `JWT_SECRET` `UPLOAD_DIR` `QWEATHER_*`
-
-> ⚠️ `*.pem` 私钥、`application-dev.yml`、`.env` 都已在 `.gitignore` 中，**不要用 `git add -f` 强行提交**。
-
+| `spring.rabbitmq.host / username / password` | RabbitMQ 连接信息 |
+| `spring.mail.username / password` | 发件邮箱与 SMTP 授权码 |
+| `spring.ai.openai.api-key` | 智谱 `GLM-4-Flash` API Key |
+| `jwt.secret` | HMAC-SHA 签名密钥，**长度 ≥ 32 字节** |
+| `qweather.*` | 和风天气 Host / Kid / 私钥路径（可选） |
 
 ### 四、启动
 
 ```bash
-# 后端，默认 8080
+# 后端（默认 8080）
 cd backend
 mvn clean install
 mvn spring-boot:run
-```
 
-```bash
-# 前端，默认 5173
+# 前端（默认 5173，/api 与 /images 已在 vite.config.js 代理到 8080）
 cd frontend
 npm install
 npm run dev
 ```
 
 浏览器打开 `http://localhost:5173`。
+
+> 首次启动会自动重算一次热榜，之后每 10 分钟刷新；Redis 不可用时热榜为空，但不影响帖子列表。
+
+---
+
+## 路线图
+
+- [x] 拦截器统一鉴权 + `jti` 黑名单登出
+- [x] 写操作接口语义整改（GET → POST / PUT / DELETE / PATCH）
+- [x] 前端按功能域分层 + 设计变量统一视觉
+- [ ] 代码块语法高亮（`highlight.js` 渲染后处理）
+- [ ] AI 代码辨析独立页（同一 SSE 接口，结构化输出）
+- [ ] 采纳答案 + 声望体系（问答形态闭环）
+- [ ] 面试复盘结构化字段（公司 / 轮次 / 结果 / 题目）
 
 ---
 

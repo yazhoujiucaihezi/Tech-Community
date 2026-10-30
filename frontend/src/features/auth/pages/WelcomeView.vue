@@ -3,7 +3,7 @@
         <div class="welcome-left">
             <div class="welcome-brand">
                 <img src="/brand-logo.png" alt="logo"/>
-                <span>亚洲韭菜盒子</span>
+                <span>极客技术社区</span>
             </div>
             <div class="welcome-slogan">
                 <div class="slogan-main">写代码，也写复盘。</div>
