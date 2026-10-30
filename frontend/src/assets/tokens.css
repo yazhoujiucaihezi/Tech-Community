@@ -300,12 +300,31 @@ code, pre, .mono {
 .comment-content pre {
     background: var(--code-bg);
     color: var(--code-text);
-    padding: 14px 16px;
+    padding: 34px 16px 14px;
     border-radius: var(--radius);
     overflow-x: auto;
     font-family: var(--font-mono);
     font-size: 13px;
-    line-height: 1.6;
+    line-height: 1.65;
+    position: relative;
+}
+
+/* 代码块左上角的语言标签 */
+.topic-content pre[data-language]::before {
+    content: attr(data-language);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 26px;
+    line-height: 26px;
+    padding: 0 14px;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #7d8794;
+    background: rgba(255, 255, 255, .04);
+    border-bottom: 1px solid #1f242c;
 }
 
 .topic-content code:not(pre code) {
