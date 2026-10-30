@@ -61,21 +61,21 @@
 
 ## 界面预览
 
-> 截图放在 `docs/screenshots/` 下，或用 GitHub 编辑器拖拽上传后把 `src` 换成生成的链接。
-
 <div align="center">
 
-<img width="880" alt="首页" src="docs/screenshots/01-home.png" />
+<img width="880" alt="首页" src="https://github.com/user-attachments/assets/a681130a-5063-4eb0-8dee-4cb0bfac4d44" />
 
 <details>
-<summary><b>点击展开更多截图（帖子详情 / 登录 / 管理后台）</b></summary>
+<summary><b>点击展开更多截图（帖子详情 / 编辑器 / 个人中心 / 管理后台）</b></summary>
 <br>
 
-<img width="880" alt="帖子详情" src="docs/screenshots/02-topic-detail.png" />
+<img width="880" alt="帖子详情" src="https://github.com/user-attachments/assets/6d65ec68-5402-4f36-8678-a1f022aaa61f" />
 
-<img width="880" alt="登录页" src="docs/screenshots/03-login.png" />
+<img width="880" alt="AI助手" src="https://github.com/user-attachments/assets/bd46a421-37a9-4465-a537-ab78b0b595d0" />
 
-<img width="880" alt="管理后台" src="docs/screenshots/04-admin.png" />
+<img width="880" alt="帖子管理" src="https://github.com/user-attachments/assets/e1547633-d2d2-4994-aab6-ecbd7a0ea937" />
+
+<img width="880" alt="热点redis" src="https://github.com/user-attachments/assets/4b7374e2-d506-4663-9a0c-76e3d2d636d7" />
 
 </details>
 
