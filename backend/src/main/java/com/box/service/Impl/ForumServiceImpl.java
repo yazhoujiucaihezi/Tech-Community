@@ -204,7 +204,8 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
         wrapper.eq(TopicComment::getTid, tid);
         wrapper.orderByDesc(TopicComment::getTime);
 
-        Page<TopicComment> topicCommentPage = topicCommentMapper.selectPage(new Page<>(page + 1, 10), wrapper);
+        // 前端页码从 1 开始，MyBatis-Plus 的 Page 也是 1 开始，这里不能再 +1
+        Page<TopicComment> topicCommentPage = topicCommentMapper.selectPage(new Page<>(page, 10), wrapper);
 
         for (TopicComment topicComment : topicCommentPage.getRecords()) {
             CommentVO commentVO = new CommentVO();
