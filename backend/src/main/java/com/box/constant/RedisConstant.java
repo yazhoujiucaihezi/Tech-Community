@@ -4,4 +4,6 @@ public class RedisConstant {
     public static final String hot = "forum:hot";
 
     public static final String hot_tem = "forum:hot:tem";
+
+    public static final String blackList = "jwt:blackList:";
 }

@@ -1,10 +1,10 @@
 package com.box.controller;
 
 import com.box.common.Result;
+import com.box.common.UserContext;
 import com.box.entity.User;
 import com.box.exception.BusinessException;
 import com.box.mapper.UserMapper;
-import com.box.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -26,12 +26,9 @@ public class ImageController {
 
     private final UserMapper userMapper;
 
-    private final JwtUtils jwtUtils;
-
     @PostMapping("/avatar")
-    public Result<String> avatar(@RequestHeader("Authorization") String authHeader,
-                                 @RequestParam("file") MultipartFile file){
-        Integer uid = jwtUtils.getUid(authHeader);
+    public Result<String> avatar(@RequestParam("file") MultipartFile file){
+        Integer uid = UserContext.getUid();
         User user = userMapper.selectById(uid);
         checkFile(file, user);
 
@@ -58,10 +55,9 @@ public class ImageController {
 
 
     @PostMapping("/cache")
-    public Result<String> cache(@RequestHeader("Authorization") String authHeader,
-                                @RequestParam("file") MultipartFile file){
+    public Result<String> cache(@RequestParam("file") MultipartFile file){
         //获得uid
-        Integer uid = jwtUtils.getUid(authHeader);
+        Integer uid = UserContext.getUid();
         User user = userMapper.selectById(uid);
         //查看user和file是否为null
         checkFile(file, user);

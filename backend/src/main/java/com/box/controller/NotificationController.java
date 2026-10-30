@@ -1,9 +1,9 @@
 package com.box.controller;
 
 import com.box.common.Result;
+import com.box.common.UserContext;
 import com.box.entity.Notification;
 import com.box.service.NotificationService;
-import com.box.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,26 +18,24 @@ import java.util.List;
 public class NotificationController {
 
     private final NotificationService notificationService;
-    private final JwtUtils jwtUtils;
 
     /** 获取通知列表 */
     @GetMapping("list")
-    public Result<List<Notification>> list(@RequestHeader("Authorization") String authHeader) {
-        return Result.success(notificationService.list(jwtUtils.getUid(authHeader)));
+    public Result<List<Notification>> list() {
+        return Result.success(notificationService.list(UserContext.getUid()));
     }
 
     /** 删除单条通知 */
     @GetMapping("/delete")
-    public Result<Void> delete(@RequestHeader("Authorization") String authHeader,
-                               @RequestParam Integer id) {
-        notificationService.delete(jwtUtils.getUid(authHeader), id);
+    public Result<Void> delete(@RequestParam Integer id) {
+        notificationService.delete(UserContext.getUid(), id);
         return Result.success(null);
     }
 
     /** 删除全部通知 */
     @GetMapping("/delete-all")
-    public Result<Void> deleteAll(@RequestHeader("Authorization") String authHeader) {
-        notificationService.deleteAll(jwtUtils.getUid(authHeader));
+    public Result<Void> deleteAll() {
+        notificationService.deleteAll(UserContext.getUid());
         return Result.success(null);
     }
 }

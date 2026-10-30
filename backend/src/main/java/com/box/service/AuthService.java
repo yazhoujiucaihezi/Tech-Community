@@ -35,4 +35,6 @@ public interface AuthService extends IService<User> {
      * 重置密码：校验通过后写入新密码
      */
     void resetPassword(RegisterDTO dto);
+
+    void logout(String authHeader);
 }

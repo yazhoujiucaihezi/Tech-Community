@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.box.config.RabbitMQConfig;
 import com.box.constant.RedisConstant;
 import com.box.dto.CommentDTO;
-import com.box.dto.NotificationMessage;
+import com.box.constant.NotificationMessage;
 import com.box.dto.TopicUpdateDTO;
 import com.box.entity.*;
 import com.box.exception.BusinessException;
@@ -449,14 +449,6 @@ public class ForumServiceImpl extends ServiceImpl<ForumMapper, Forum> implements
 
     // ========================== 方法 =================================
 
-    // ==================== TODO A-19 富文本转纯文本 ====================
-    // 需求：
-    //   1. 入参是富文本编辑器输出的 JSON，需提取其中所有文本片段并拼接
-    //   2. 忽略非文本片段（图片、视频等嵌入对象）
-    //   3. 解析失败时降级返回原文，不能让发帖接口整体失败
-    //   4. 输出需 trim，长度受控（用于列表页摘要）
-    // 手册：§7.2 富文本存储与 XSS
-    // 自测：纯文本帖摘要正确；含图片的帖摘要不含 JSON 片段；乱码输入不抛异常
     private String parseQuillText(String content,Integer maxLen) {
         if (content == null || content.isBlank()) {
             return "";

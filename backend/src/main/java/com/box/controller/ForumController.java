@@ -1,6 +1,7 @@
 package com.box.controller;
 
 import com.box.common.Result;
+import com.box.common.UserContext;
 import com.box.dto.CommentDTO;
 import com.box.dto.TopicUpdateDTO;
 import com.box.entity.Topic;
@@ -15,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
-import com.box.utils.JwtUtils;
 
 import java.util.List;
 
@@ -30,7 +30,6 @@ public class ForumController {
 
     private final ForumService forumService;
     private final WeatherService weatherService;
-    private final JwtUtils jwtUtils;
 
     /**
      * 获取帖子类型
@@ -62,19 +61,18 @@ public class ForumController {
      * 获取帖子详情
      */
     @GetMapping("/topic")
-    public Result<TopicDetailVO> getTopic(@RequestHeader("Authorization") String authHeader, @RequestParam Integer tid) {
-        return Result.success(forumService.getTopic(jwtUtils.getUid(authHeader), tid));
+    public Result<TopicDetailVO> getTopic(@RequestParam Integer tid) {
+        return Result.success(forumService.getTopic(UserContext.getUid(), tid));
     }
 
     /**
      * 帖子点赞/收藏
      */
     @GetMapping("/interact")
-    public Result<Void> interact(@RequestHeader("Authorization") String authHeader,
-                                 @RequestParam Integer tid,
+    public Result<Void> interact(@RequestParam Integer tid,
                                  @RequestParam String type,
                                  @RequestParam Boolean state) {
-        forumService.interact(jwtUtils.getUid(authHeader), tid, type, state);
+        forumService.interact(UserContext.getUid(), tid, type, state);
         return Result.success(null);
     }
 
@@ -90,9 +88,8 @@ public class ForumController {
      * 添加帖子评论
      */
     @PostMapping("/add-comment")
-    public Result<Void> addComment(@RequestHeader("Authorization") String authHeader,
-                                   @RequestBody CommentDTO commentDTO) {
-        forumService.addComment(jwtUtils    .getUid(authHeader), commentDTO);
+    public Result<Void> addComment(@RequestBody CommentDTO commentDTO) {
+        forumService.addComment(UserContext.getUid(), commentDTO);
         return Result.success(null);
     }
 
@@ -100,9 +97,8 @@ public class ForumController {
      * 删除帖子评论
      */
     @GetMapping("/delete-comment")
-    public Result<Void> deleteComment(@RequestHeader("Authorization") String authHeader,
-                                      @RequestParam Integer id) {
-        forumService.deleteComment(jwtUtils.getUid(authHeader), jwtUtils.getRole(authHeader), id);
+    public Result<Void> deleteComment(@RequestParam Integer id) {
+        forumService.deleteComment(UserContext.getUid(), UserContext.getRole(), id);
         return Result.success(null);
     }
 
@@ -110,9 +106,8 @@ public class ForumController {
      * 修改帖子
      */
     @PostMapping("/update-topic")
-    public Result<Void> updateTopic(@RequestHeader("Authorization") String authHeader,
-                                    @RequestBody TopicUpdateDTO dto) {
-        forumService.updateTopic(jwtUtils.getRole(authHeader), jwtUtils.getUid(authHeader), dto);
+    public Result<Void> updateTopic(@RequestBody TopicUpdateDTO dto) {
+        forumService.updateTopic(UserContext.getRole(), UserContext.getUid(), dto);
         return Result.success(null);
     }
 
@@ -120,9 +115,8 @@ public class ForumController {
      * 创建帖子
      */
     @PostMapping("/create-topic")
-    public Result<Void> createTopic(@RequestHeader("Authorization") String authHeader,
-                                    @RequestBody TopicUpdateDTO dto) {
-        forumService.createTopic(jwtUtils.getUid(authHeader), dto);
+    public Result<Void> createTopic(@RequestBody TopicUpdateDTO dto) {
+        forumService.createTopic(UserContext.getUid(), dto);
         return Result.success(null);
     }
 
@@ -130,16 +124,15 @@ public class ForumController {
      * 删除帖子
      */
     @GetMapping("/delete-topic")
-    public Result<Void> deleteTopic(@RequestHeader("Authorization") String authHeader,
-                                    @RequestParam Integer tid) {
-        forumService.deleteTopic(jwtUtils.getUid(authHeader), jwtUtils.getRole(authHeader), tid);
+    public Result<Void> deleteTopic(@RequestParam Integer tid) {
+        forumService.deleteTopic(UserContext.getUid(), UserContext.getRole(), tid);
         return Result.success(null);
     }
 
     /** 获取当前用户的帖子列表 */
     @GetMapping("/user-topic")
-    public Result<List<Topic>> getUserTopic(@RequestHeader("Authorization") String authHeader) {
-        return Result.success(forumService.getUserTopic(jwtUtils.getUid(authHeader)));
+    public Result<List<Topic>> getUserTopic() {
+        return Result.success(forumService.getUserTopic(UserContext.getUid()));
     }
 
     /** 搜索帖子 */
@@ -150,8 +143,8 @@ public class ForumController {
 
     /** 获取当前用户收藏的帖子 */
     @GetMapping("/collects")
-    public Result<List<Topic>> getCollectsTopic(@RequestHeader("Authorization") String authHeader) {
-        return Result.success(forumService.getCollectsTopic(jwtUtils.getUid(authHeader)));
+    public Result<List<Topic>> getCollectsTopic() {
+        return Result.success(forumService.getCollectsTopic(UserContext.getUid()));
     }
 
     /** 获取天气信息 */

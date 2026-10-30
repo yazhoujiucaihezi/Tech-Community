@@ -1,7 +1,7 @@
 package com.box.consumer;
 
 import com.box.config.RabbitMQConfig;
-import com.box.dto.NotificationMessage;
+import com.box.constant.NotificationMessage;
 import com.box.entity.Notification;
 import com.box.mapper.NotificationMapper;
 import lombok.RequiredArgsConstructor;

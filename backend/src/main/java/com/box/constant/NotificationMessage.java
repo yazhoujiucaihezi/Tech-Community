@@ -1,4 +1,4 @@
-package com.box.dto;
+package com.box.constant;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

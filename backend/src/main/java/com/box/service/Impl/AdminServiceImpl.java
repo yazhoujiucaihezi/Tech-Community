@@ -221,8 +221,7 @@ public class AdminServiceImpl implements AdminService {
         if (user == null) {
             throw new RuntimeException("用户不存在");
         }
-        //TODO   2. 重置后应让该用户已签发的令牌失效（思考：无状态令牌怎么做）
-        user.setPassword(bCryptPasswordEncoder.encode(dto.getNewPassword())); // TODO A-8: 替换为哈希结果
+        user.setPassword(bCryptPasswordEncoder.encode(dto.getNewPassword()));
         userMapper.updateById(user);
     }
 

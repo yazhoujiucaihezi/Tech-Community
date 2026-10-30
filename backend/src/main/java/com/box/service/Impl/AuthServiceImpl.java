@@ -3,6 +3,7 @@ package com.box.service.Impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.box.constant.RedisConstant;
 import com.box.dto.LoginDTO;
 import com.box.dto.RegisterDTO;
 import com.box.entity.EmailRecord;
@@ -11,7 +12,9 @@ import com.box.exception.BusinessException;
 import com.box.mapper.AuthMapper;
 import com.box.mapper.EmailMapper;
 import com.box.service.AuthService;
+import com.box.utils.JwtUtils;
 import com.box.vo.LoginVO;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,6 +51,8 @@ public class AuthServiceImpl extends ServiceImpl<AuthMapper, User> implements Au
     private final JavaMailSender javaMailSender;
 
     private final EmailMapper emailMapper;
+
+    private final JwtUtils jwtUtils;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -74,6 +80,7 @@ public class AuthServiceImpl extends ServiceImpl<AuthMapper, User> implements Au
                 .claim("role", user.getRole())
                 .expiration(date)
                 .signWith(key)
+                .id(user.getId()+UUID.randomUUID().toString())
                 .compact();
         vo.setToken(token);
         vo.setExpire(date);
@@ -161,6 +168,19 @@ public class AuthServiceImpl extends ServiceImpl<AuthMapper, User> implements Au
         authMapper.updateById(user);
         stringRedisTemplate.delete(dto.getEmail()+":"+"reset");
         emailStatus(dto);
+    }
+
+    /**
+     * 退出登录
+     */
+    @Override
+    public void logout(String authHeader) {
+        Claims token = jwtUtils.parse(authHeader);
+        long ttl = token.getExpiration().getTime() - System.currentTimeMillis();
+        if (ttl > 0){
+            stringRedisTemplate.opsForValue().set(RedisConstant.blackList + token.getId(),"1",ttl,TimeUnit.MILLISECONDS);
+        }
+
     }
 
     private void emailStatus(RegisterDTO dto) {

@@ -31,7 +31,8 @@ public class AuthController {
      * 用户登出
      */
     @GetMapping("/logout")
-    public Result<Void> logout(){
+    public Result<Void> logout(@RequestHeader("Authorization") String authHeader){
+        authService.logout(authHeader);
         return Result.success(null);
     }
 

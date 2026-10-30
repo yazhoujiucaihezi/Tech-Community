@@ -2,6 +2,7 @@ package com.box.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.box.common.Result;
+import com.box.common.UserContext;
 import com.box.dto.AdminChangePasswordDTO;
 import com.box.dto.AdminStatusDTO;
 import com.box.dto.AdminUserSaveDTO;
@@ -10,7 +11,6 @@ import com.box.entity.EmailRecord;
 import com.box.entity.Topic;
 import com.box.entity.User;
 import com.box.service.AdminService;
-import com.box.utils.JwtUtils;
 import com.box.vo.AdminUserVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -21,26 +21,22 @@ import org.springframework.web.bind.annotation.*;
 public class adminController {
 
     private final AdminService adminService;
-    private final JwtUtils jwtUtils;
-
     /**
      * 获取论坛列表
      */
     @GetMapping("/forum/list")
-    public Result<Page<Topic>> getForumList(@RequestHeader("Authorization") String authHeader,
-                                            @RequestParam Integer page,
+    public Result<Page<Topic>> getForumList(@RequestParam Integer page,
                                             @RequestParam Integer size,
                                             @RequestParam(required = false) String keyword) {
-        return Result.success(adminService.getForumList(jwtUtils.getRole(authHeader), page, size, keyword));
+        return Result.success(adminService.getForumList(UserContext.get().getRole(), page, size, keyword));
     }
 
     /**
      * 置顶/取消置顶帖子
      */
     @PostMapping("/forum/top")
-    public Result<?> topForum(@RequestHeader("Authorization") String authHeader,
-                              @RequestBody AdminStatusDTO adminStatusDTO) {
-        adminService.topForum(jwtUtils.getRole(authHeader), adminStatusDTO);
+    public Result<?> topForum(@RequestBody AdminStatusDTO adminStatusDTO) {
+        adminService.topForum(UserContext.getRole(), adminStatusDTO);
         return Result.success("操作成功");
     }
 
@@ -48,9 +44,8 @@ public class adminController {
      * 删除帖子
      */
     @GetMapping("/forum/delete")
-    public Result<?> deleteForum(@RequestHeader("Authorization") String authHeader,
-                                 @RequestParam Integer tid) {
-        adminService.deleteForum(jwtUtils.getUid(authHeader),jwtUtils.getRole(authHeader), tid);
+    public Result<?> deleteForum(@RequestParam Integer tid) {
+        adminService.deleteForum(UserContext.getUid(),UserContext.getRole(), tid);
         return Result.success("操作成功");
     }
 
@@ -58,9 +53,8 @@ public class adminController {
      * 锁定/解锁帖子
      */
     @PostMapping("/forum/locked")
-    public Result<Void> lockedForum(@RequestHeader("Authorization") String authHeader,
-                                   @RequestBody AdminStatusDTO adminStatusDTO) {
-        adminService.lockedForum(jwtUtils.getRole(authHeader), adminStatusDTO);
+    public Result<Void> lockedForum(@RequestBody AdminStatusDTO adminStatusDTO) {
+        adminService.lockedForum(UserContext.getRole(), adminStatusDTO);
         return Result.success(null);
     }
 
@@ -68,9 +62,8 @@ public class adminController {
      * 隐藏/显示帖子
      */
     @PostMapping("/forum/invisible")
-    public Result<Void> invisibleForum(@RequestHeader("Authorization") String authHeader,
-                                       @RequestBody AdminStatusDTO adminStatusDTO) {
-        adminService.invisibleForum(jwtUtils.getRole(authHeader), adminStatusDTO);
+    public Result<Void> invisibleForum(@RequestBody AdminStatusDTO adminStatusDTO) {
+        adminService.invisibleForum(UserContext.getRole(), adminStatusDTO);
         return Result.success(null);
     }
 
@@ -78,10 +71,9 @@ public class adminController {
      * 修改帖子类型
      */
     @GetMapping("/forum/change-topic-type")
-    public Result<?> changeTopicType(@RequestHeader("Authorization") String authHeader,
-                                     @RequestParam Integer tid,
+    public Result<?> changeTopicType(@RequestParam Integer tid,
                                      @RequestParam Integer type) {
-        adminService.changeTopicType(jwtUtils.getRole(authHeader), tid, type);
+        adminService.changeTopicType(UserContext.getRole(), tid, type);
         return Result.success("操作成功");
     }
 
@@ -89,9 +81,8 @@ public class adminController {
      * 新增帖子分类
      */
     @PostMapping("/forum/create-type")
-    public Result<Void> createType(@RequestHeader("Authorization") String authHeader,
-                                   @RequestBody TopicTypeDTO topicTypeDTO) {
-        adminService.createType(jwtUtils.getRole(authHeader), topicTypeDTO);
+    public Result<Void> createType(@RequestBody TopicTypeDTO topicTypeDTO) {
+        adminService.createType(UserContext.getRole(), topicTypeDTO);
         return Result.success(null);
     }
 
@@ -99,9 +90,8 @@ public class adminController {
      * 修改帖子分类
      */
     @PostMapping("/forum/update-type")
-    public Result<Void> updateType(@RequestHeader("Authorization") String authHeader,
-                                   @RequestBody TopicTypeDTO topicTypeDTO) {
-        adminService.updateType(jwtUtils.getRole(authHeader), topicTypeDTO);
+    public Result<Void> updateType(@RequestBody TopicTypeDTO topicTypeDTO) {
+        adminService.updateType(UserContext.getRole(), topicTypeDTO);
         return Result.success(null);
     }
 
@@ -109,29 +99,26 @@ public class adminController {
      * 获取用户列表
      */
     @GetMapping("/user/list")
-    public Result<Page<User>> getUserList(@RequestHeader("Authorization") String authHeader,
-                                          @RequestParam Integer page,
+    public Result<Page<User>> getUserList(@RequestParam Integer page,
                                           @RequestParam Integer size,
                                           @RequestParam(required = false) String keyword) {
-        return Result.success(adminService.getUserList(jwtUtils.getRole(authHeader), page, size, keyword));
+        return Result.success(adminService.getUserList(UserContext.getRole(), page, size, keyword));
     }
 
     /**
      * 获取用户详情
      */
     @GetMapping("/user/detail")
-    public Result<AdminUserVO> getUserDetail(@RequestHeader("Authorization") String authHeader,
-                                             @RequestParam Integer id) {
-        return Result.success(adminService.getUserDetail(jwtUtils.getRole(authHeader), id));
+    public Result<AdminUserVO> getUserDetail(@RequestParam Integer id) {
+        return Result.success(adminService.getUserDetail(UserContext.getRole(), id));
     }
 
     /**
      * 保存用户信息
      */
     @PostMapping("/user/save")
-    public Result<Void> saveUser(@RequestHeader("Authorization") String authHeader,
-                                 @RequestBody AdminUserSaveDTO dto) {
-        adminService.saveUser(jwtUtils.getRole(authHeader), dto);
+    public Result<Void> saveUser(@RequestBody AdminUserSaveDTO dto) {
+        adminService.saveUser(UserContext.getRole(), dto);
         return Result.success(null);
     }
 
@@ -139,9 +126,8 @@ public class adminController {
      * 管理员修改用户密码
      */
     @PostMapping("/user/change-password")
-    public Result<Void> changePassword(@RequestHeader("Authorization") String authHeader,
-                                       @RequestBody AdminChangePasswordDTO dto) {
-        adminService.changePassword(jwtUtils.getRole(authHeader), dto);
+    public Result<Void> changePassword(@RequestBody AdminChangePasswordDTO dto) {
+        adminService.changePassword(UserContext.getRole(), dto);
         return Result.success(null);
     }
 
@@ -149,19 +135,17 @@ public class adminController {
      * 获取邮件列表
      */
     @GetMapping("/email/list")
-    public Result<Page<EmailRecord>> getEmailList(@RequestHeader("Authorization") String authHeader,
-                                                  @RequestParam Integer page,
+    public Result<Page<EmailRecord>> getEmailList(@RequestParam Integer page,
                                                   @RequestParam Integer size) {
-        return Result.success(adminService.getEmailList(jwtUtils.getRole(authHeader), page, size));
+        return Result.success(adminService.getEmailList(UserContext.getRole(), page, size));
     }
 
     /**
      * 重新发送邮件
      */
     @GetMapping("/email/resend")
-    public Result<?> resendEmail(@RequestHeader("Authorization") String authHeader,
-                                 @RequestParam Integer id) {
-        adminService.resendEmail(jwtUtils.getRole(authHeader), id);
+    public Result<?> resendEmail(@RequestParam Integer id) {
+        adminService.resendEmail(UserContext.getRole(), id);
         return Result.success("邮件已重新发送");
     }
 }
