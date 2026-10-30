@@ -12,8 +12,8 @@ import {
   User,
   WindPower
 } from "@element-plus/icons-vue";
-import {get} from "@/net";
-import {useStore} from "@/store";
+import {get} from "@/api/request";
+import {useStore} from "@/stores/general";
 import {inject, onMounted, ref} from "vue";
 import UserInfo from "@/components/UserInfo.vue";
 import router from "@/router";

@@ -26,14 +26,14 @@ public class NotificationController {
     }
 
     /** 删除单条通知 */
-    @GetMapping("/delete")
-    public Result<Void> delete(@RequestParam Integer id) {
+    @DeleteMapping("/{id}")
+    public Result<Void> delete(@PathVariable Integer id) {
         notificationService.delete(UserContext.getUid(), id);
         return Result.success(null);
     }
 
     /** 删除全部通知 */
-    @GetMapping("/delete-all")
+    @DeleteMapping("/all")
     public Result<Void> deleteAll() {
         notificationService.deleteAll(UserContext.getUid());
         return Result.success(null);

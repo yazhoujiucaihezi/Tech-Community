@@ -7,10 +7,10 @@ import {ElMessage} from "element-plus";
 import axios from "axios";
 import ImageResize from "quill-image-resize-vue";
 import { ImageExtend, QuillWatch } from "quill-image-super-solution-module";
-import {accessHeader} from "@/net";
+import {accessHeader} from "@/api/request";
 import ColorDot from "@/components/ColorDot.vue";
-import {useStore} from "@/store";
-import {apiForumTopicCreate} from "@/net/api/forum";
+import {useStore} from "@/stores/general";
+import {apiForumTopicCreate} from "@/api/topic";
 
 const emit= defineEmits(['close','success'])
 

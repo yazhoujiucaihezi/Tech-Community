@@ -18,12 +18,12 @@ import Weather from "@/components/Weather.vue";
 import {computed, onMounted, reactive, ref, watch} from "vue";
 import {ElMessage} from "element-plus";
 import TopicEditor from "@/components/TopicEditor.vue";
-import {useStore} from "@/store";
+import {useStore} from "@/stores/general";
 import ColorDot from "@/components/ColorDot.vue";
 import router from "@/router";
 import TopicTag from "@/components/TopicTag.vue";
 import TopicCollectList from "@/components/TopicCollectList.vue";
-import {apiForumTopicList, apiForumTopTopics, apiForumWeather, apiForumHotTopics} from "@/net/api/forum";
+import {apiForumTopicList, apiForumTopTopics, apiForumWeather, apiForumHotTopics} from "@/api/topic";
 
 const store = useStore();
 

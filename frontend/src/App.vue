@@ -1,8 +1,8 @@
 <script setup>
 import { useDark, useToggle } from '@vueuse/core'
 import {onMounted, provide, ref} from "vue";
-import {apiUserInfo} from "@/net/api/user";
-import {isUnauthorized} from "@/net";
+import {apiUserInfo} from "@/api/user";
+import {isUnauthorized} from "@/api/request";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 
 useDark({

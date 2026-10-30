@@ -4,8 +4,8 @@ import Card from "@/components/Card.vue";
 import {Lock, Setting, Switch} from "@element-plus/icons-vue";
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage} from "element-plus";
-import {get, post} from "@/net";
-import {apiUserChangePassword, apiUserPrivacy, apiUserPrivacySave} from "@/net/api/user";
+import {get, post} from "@/api/request";
+import {apiUserChangePassword, apiUserPrivacy, apiUserPrivacySave} from "@/api/user";
 
 const form = reactive({
   password:'',

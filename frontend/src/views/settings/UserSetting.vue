@@ -2,12 +2,13 @@
 
 import Card from "@/components/Card.vue";
 import {Message, Refresh, Select, User} from "@element-plus/icons-vue";
-import {useStore} from "@/store";
+import {useStore} from "@/stores/general";
 import {computed, onMounted, reactive, ref} from "vue";
-import {accessHeader} from "@/net";
+import {accessHeader} from "@/api/request";
 import {ElMessage} from "element-plus";
 import axios from "axios";
-import {apiAuthAskCode, apiUserDetail, apiUserDetailSave, apiUserModifyEmail} from "@/net/api/user";
+import {apiAuthAskCode} from "@/api/auth";
+import {apiUserDetail, apiUserDetailSave, apiUserModifyEmail} from "@/api/user";
 
 const store = useStore()
 

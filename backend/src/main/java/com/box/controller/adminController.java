@@ -6,6 +6,7 @@ import com.box.common.UserContext;
 import com.box.dto.AdminChangePasswordDTO;
 import com.box.dto.AdminStatusDTO;
 import com.box.dto.AdminUserSaveDTO;
+import com.box.dto.ChangeTypeDTO;
 import com.box.dto.TopicTypeDTO;
 import com.box.entity.EmailRecord;
 import com.box.entity.Topic;
@@ -43,8 +44,8 @@ public class adminController {
     /**
      * 删除帖子
      */
-    @GetMapping("/forum/delete")
-    public Result<?> deleteForum(@RequestParam Integer tid) {
+    @DeleteMapping("/topics/{tid}")
+    public Result<?> deleteForum(@PathVariable Integer tid) {
         adminService.deleteForum(UserContext.getUid(),UserContext.getRole(), tid);
         return Result.success("操作成功");
     }
@@ -70,10 +71,10 @@ public class adminController {
     /**
      * 修改帖子类型
      */
-    @GetMapping("/forum/change-topic-type")
-    public Result<?> changeTopicType(@RequestParam Integer tid,
-                                     @RequestParam Integer type) {
-        adminService.changeTopicType(UserContext.getRole(), tid, type);
+    @PatchMapping("/topics/{tid}/type")
+    public Result<?> changeTopicType(@PathVariable Integer tid,
+                                     @RequestBody ChangeTypeDTO dto) {
+        adminService.changeTopicType(UserContext.getRole(), tid, dto.getType());
         return Result.success("操作成功");
     }
 
@@ -143,8 +144,8 @@ public class adminController {
     /**
      * 重新发送邮件
      */
-    @GetMapping("/email/resend")
-    public Result<?> resendEmail(@RequestParam Integer id) {
+    @PostMapping("/emails/{id}/resend")
+    public Result<?> resendEmail(@PathVariable Integer id) {
         adminService.resendEmail(UserContext.getRole(), id);
         return Result.success("邮件已重新发送");
     }

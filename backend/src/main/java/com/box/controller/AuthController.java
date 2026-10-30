@@ -1,6 +1,7 @@
 package com.box.controller;
 
 import com.box.common.Result;
+import com.box.dto.EmailCodeDTO;
 import com.box.dto.LoginDTO;
 import com.box.dto.RegisterDTO;
 import com.box.service.AuthService;
@@ -30,7 +31,7 @@ public class AuthController {
     /**
      * 用户登出
      */
-    @GetMapping("/logout")
+    @PostMapping("/logout")
     public Result<Void> logout(@RequestHeader("Authorization") String authHeader){
         authService.logout(authHeader);
         return Result.success(null);
@@ -39,10 +40,9 @@ public class AuthController {
     /**
      * 获取验证码
      */
-    @GetMapping("/ask-code")
-    public Result<Void> askCode(@RequestParam String email,
-                                @RequestParam String type){
-        authService.askCode(email, type);
+    @PostMapping("/code")
+    public Result<Void> askCode(@RequestBody EmailCodeDTO dto){
+        authService.askCode(dto.getEmail(), dto.getType());
         return Result.success(null);
     }
 

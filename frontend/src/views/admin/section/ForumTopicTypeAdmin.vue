@@ -1,7 +1,7 @@
 <script setup>
 
 import {reactive} from "vue";
-import {apiTopicTypeCreate, apiTopicTypeDelete, apiTopicTypeUpdate} from "@/net/api/forum";
+import {apiTopicTypeCreate, apiTopicTypeDelete, apiTopicTypeUpdate} from "@/api/admin";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Plus} from "@element-plus/icons-vue";
 

@@ -52,8 +52,8 @@
 import {User, Lock} from '@element-plus/icons-vue'
 import router from "@/router";
 import {inject, reactive, ref} from "vue";
-import {login} from '@/net'
-import {apiUserInfo} from "@/net/api/user";
+import {login} from '@/api/auth'
+import {apiUserInfo} from "@/api/user";
 
 const formRef = ref()
 const form = reactive({

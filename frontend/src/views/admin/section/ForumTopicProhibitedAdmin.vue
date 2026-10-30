@@ -1,5 +1,5 @@
 <script setup>
-import {apiForumProhibit, apiForumProhibitedList} from "@/net/api/forum";
+import {apiForumProhibit, apiForumProhibitedList} from "@/api/admin";
 import {ElMessage} from "element-plus";
 import {ref} from "vue";
 

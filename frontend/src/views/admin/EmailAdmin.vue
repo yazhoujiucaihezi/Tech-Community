@@ -1,5 +1,5 @@
 <script setup>
-import {apiEmailRecordList, apiEmailResend} from "@/net/api/email";
+import {apiEmailRecordList, apiEmailResend} from "@/api/admin";
 import {reactive, watchEffect} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {RefreshRight, User} from "@element-plus/icons-vue";

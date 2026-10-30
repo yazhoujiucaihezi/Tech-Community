@@ -10,11 +10,11 @@ import {
 } from "@element-plus/icons-vue";
 import LightCard from "@/components/LightCard.vue";
 import UserInfo from "@/components/UserInfo.vue";
-import {apiNotificationDelete, apiNotificationDeleteAll, apiNotificationList} from "@/net/api/user";
+import {apiNotificationDelete, apiNotificationDeleteAll, apiNotificationList} from "@/api/notification";
 import AiChatWindow from "@/components/AiChatWindow.vue";
-import {apiForumTypes, apiTopicSearch} from "@/net/api/forum";
+import {apiForumTypes, apiTopicSearch} from "@/api/topic";
 import TopicTag from "@/components/TopicTag.vue";
-import {useStore} from "@/store";
+import {useStore} from "@/stores/general";
 import router from "@/router";
 
 const store = useStore()

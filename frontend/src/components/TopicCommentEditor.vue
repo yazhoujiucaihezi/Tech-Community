@@ -6,8 +6,8 @@ import {ImageExtend, QuillWatch} from "quill-image-super-solution-module";
 import {Check, Close} from "@element-plus/icons-vue";
 import {ref} from "vue";
 import axios from "axios";
-import {accessHeader} from "@/net";
-import {apiForumCommentSubmit} from "@/net/api/forum";
+import {accessHeader} from "@/api/request";
+import {apiForumCommentSubmit} from "@/api/topic";
 import {ElMessage} from "element-plus";
 
 const props = defineProps({

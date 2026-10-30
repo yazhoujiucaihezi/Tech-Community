@@ -80,7 +80,7 @@
 <script setup>
 import {reactive, ref} from "vue";
 import {EditPen, Lock, Message} from "@element-plus/icons-vue";
-import {apiAuthAskCode, apiAuthResetPassword, apiAuthRestConfirm} from "@/net/api/user";
+import {apiAuthAskCode, apiAuthResetPassword, apiAuthRestConfirm} from "@/api/auth";
 
 const active = ref(0)
 

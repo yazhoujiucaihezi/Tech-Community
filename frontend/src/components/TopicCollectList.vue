@@ -4,7 +4,7 @@ import LightCard from "@/components/LightCard.vue";
 import router from "@/router";
 import TopicTag from "@/components/TopicTag.vue";
 import {ElMessage} from "element-plus";
-import {apiForumCollect, apiForumCollectDelete} from "@/net/api/forum";
+import {apiForumCollect, apiForumCollectDelete} from "@/api/topic";
 
 defineProps({
   show: Boolean

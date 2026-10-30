@@ -1,7 +1,7 @@
 <script setup>
 import {ref} from "vue";
 import {CloseBold} from "@element-plus/icons-vue";
-import {apiChatWithAI} from "@/net/api/ai";
+import {apiChatWithAI} from "@/api/ai";
 import MarkdownIt from "markdown-it";
 
 const md = new MarkdownIt()

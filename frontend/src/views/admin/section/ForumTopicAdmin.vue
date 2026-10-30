@@ -6,9 +6,10 @@ import {
     apiForumTopicDelete, apiForumTopicInvisible,
     apiForumTopicLocked,
     apiForumTopicTop,
-    apiForumTypes, apiTopicChangeType
-} from "@/net/api/forum";
-import {useStore} from "@/store";
+    apiTopicChangeType
+} from "@/api/admin";
+import {apiForumTypes} from "@/api/topic";
+import {useStore} from "@/stores/general";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Hide, Lock, Top, User, Search} from "@element-plus/icons-vue";
 

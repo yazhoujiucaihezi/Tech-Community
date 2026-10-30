@@ -3,6 +3,7 @@ package com.box.controller;
 import com.box.common.Result;
 import com.box.common.UserContext;
 import com.box.dto.CommentDTO;
+import com.box.dto.InteractDTO;
 import com.box.dto.TopicUpdateDTO;
 import com.box.entity.Topic;
 import com.box.entity.TopicType;
@@ -68,11 +69,9 @@ public class ForumController {
     /**
      * 帖子点赞/收藏
      */
-    @GetMapping("/interact")
-    public Result<Void> interact(@RequestParam Integer tid,
-                                 @RequestParam String type,
-                                 @RequestParam Boolean state) {
-        forumService.interact(UserContext.getUid(), tid, type, state);
+    @PostMapping("/interactions")
+    public Result<Void> interact(@RequestBody InteractDTO dto) {
+        forumService.interact(UserContext.getUid(), dto.getTid(), dto.getType(), dto.getState());
         return Result.success(null);
     }
 
@@ -96,8 +95,8 @@ public class ForumController {
     /**
      * 删除帖子评论
      */
-    @GetMapping("/delete-comment")
-    public Result<Void> deleteComment(@RequestParam Integer id) {
+    @DeleteMapping("/comments/{id}")
+    public Result<Void> deleteComment(@PathVariable Integer id) {
         forumService.deleteComment(UserContext.getUid(), UserContext.getRole(), id);
         return Result.success(null);
     }
@@ -123,8 +122,8 @@ public class ForumController {
     /**
      * 删除帖子
      */
-    @GetMapping("/delete-topic")
-    public Result<Void> deleteTopic(@RequestParam Integer tid) {
+    @DeleteMapping("/topics/{tid}")
+    public Result<Void> deleteTopic(@PathVariable Integer tid) {
         forumService.deleteTopic(UserContext.getUid(), UserContext.getRole(), tid);
         return Result.success(null);
     }

@@ -68,7 +68,7 @@ import {EditPen, Lock, Message, User} from "@element-plus/icons-vue";
 import router from "@/router";
 import {reactive, ref} from "vue";
 import {ElMessage} from "element-plus";
-import {apiAuthAskCode, apiAuthRegister} from "@/net/api/user";
+import {apiAuthAskCode, apiAuthRegister} from "@/api/auth";
 
 const form = reactive({
     username: '',

@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import {isRoleAdmin, isUnauthorized} from "@/net";
+import {isRoleAdmin, isUnauthorized} from "@/api/request";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),

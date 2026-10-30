@@ -19,7 +19,7 @@
     import TopicTag from "@/components/TopicTag.vue";
     import InteractButton from "@/components/InteractButton.vue";
     import {ElMessage} from "element-plus";
-    import {useStore} from "@/store";
+    import {useStore} from "@/stores/general";
     import TopicEditor from "@/components/TopicEditor.vue";
     import TopicCommentEditor from "@/components/TopicCommentEditor.vue";
     import {
@@ -28,8 +28,8 @@
     apiForumInteract,
     apiForumTopic,
     apiForumUpdateTopic
-    } from "@/net/api/forum";
-    import { apiForumUserTopicDelete } from "@/net/api/forum"; 
+    } from "@/api/topic";
+    import { apiForumUserTopicDelete } from "@/api/topic"; 
 
     const route = useRoute()
     const store = useStore()
@@ -68,12 +68,14 @@
     }
 
     function interact(type, message) {
+  const next = !topic[type]
   if (type === 'like') {
-    topic.likeCount += topic.like ? -1 : 1
+    topic.likeCount += next ? 1 : -1
   } else if (type === 'collect') {
-    topic.collectCount += topic.collect ? -1 : 1
+    topic.collectCount += next ? 1 : -1
   }
-  apiForumInteract(tid, type, topic, message)
+  topic[type] = next
+  apiForumInteract(tid, type, next, message)
 }
 
     function updateTopic(editor) {

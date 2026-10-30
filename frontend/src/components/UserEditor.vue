@@ -2,7 +2,7 @@
 
 import {EditPen} from "@element-plus/icons-vue";
 import {reactive} from "vue";
-import {apiUserDetailTotal, apiUserSave} from "@/net/api/user";
+import {apiUserDetailTotal, apiUserSave} from "@/api/admin";
 import {ElMessage} from "element-plus";
 
 const props = defineProps({

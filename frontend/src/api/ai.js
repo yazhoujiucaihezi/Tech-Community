@@ -1,4 +1,4 @@
-import {fetchPost} from "@/net";
+import {fetchPost} from "@/api/request";
 
 export const apiChatWithAI = async (context, onMessage, onError, onComplete) => {
     try {

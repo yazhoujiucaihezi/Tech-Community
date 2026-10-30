@@ -1,7 +1,7 @@
 <script setup>
 import {Back, Message, Operation, Right, Sort} from "@element-plus/icons-vue";
-import {useStore} from "@/store";
-import {isRoleAdmin, logout} from "@/net";
+import {useStore} from "@/stores/general";
+import {isRoleAdmin, logout} from "@/api/request";
 import router from "@/router";
 import {useRoute} from "vue-router";
 import {computed} from "vue";
