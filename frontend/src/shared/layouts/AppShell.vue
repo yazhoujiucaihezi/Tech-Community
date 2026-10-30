@@ -6,6 +6,7 @@
 import {inject, ref} from "vue";
 import {Bell, Check, ChatDotSquare, CoffeeCup, Lock, Plus, Search, User} from "@element-plus/icons-vue";
 import UserInfo from "@/features/user/components/UserInfo.vue";
+import AiChatWindow from "@/features/ai/components/AiChatWindow.vue";
 import {apiNotificationDelete, apiNotificationDeleteAll, apiNotificationList} from "@/api/notification";
 import {apiTopicSearch, apiForumTypes} from "@/api/topic";
 import {useStore} from "@/stores/general";
@@ -137,6 +138,9 @@ function goBoard(typeId) {
                 <slot/>
             </main>
         </div>
+
+        <!-- AI 助手悬浮窗，详情页不显示（避免挡住评论输入） -->
+        <ai-chat-window v-if="$route.name !== 'topic-detail'"/>
     </div>
 </template>
 
